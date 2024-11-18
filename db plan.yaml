@@ -1,0 +1,18 @@
+subject:
+ -id
+ -name (string)
+
+class:
+ -id
+ -subject (1:1)
+ -schedule (1:1)
+ -startHour (uint from 7 to 20)
+ -duration (default 2)
+ -room (string)
+ -isExercise (bool)
+
+schedule:
+ -id
+ -group (string)
+ -isWinterTerm (bool)
+ -year (date year)

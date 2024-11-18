@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ScheduleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -10,3 +11,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return 'API';
 });
+
+Route::apiResource('schedule', ScheduleController::class);
