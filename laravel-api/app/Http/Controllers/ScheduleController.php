@@ -3,15 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\Schedule;
+use App\Models\Subject;
+use App\Models\UniClass;
 use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
     public function index() {
-        $schedules = Schedule::all();
+        $class = UniClass::all()->first();
+        $subj = $class->subject;
+        $sch = $class->schedule;
 
         return [
-            'schedules' => $schedules,
+            'subjects' => Subject::all(),
+            'schedules' => Schedule::all(),
+            'uni_classes' => UniClass::all(),
+            'subj' => $subj,
+            'sch' => $sch
         ];
     }
 

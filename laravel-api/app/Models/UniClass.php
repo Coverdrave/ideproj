@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class UniClass extends Model
@@ -19,11 +20,11 @@ class UniClass extends Model
         'isExercise',
     ];
 
-    public function subject() : HasOne {
-        return $this->hasOne(Subject::class);
+    public function subject() : BelongsTo {
+        return $this->belongsTo(Subject::class);
     }
 
-    public function schedule() : HasOne {
-        return $this->hasOne(Schedule::class);
+    public function schedule() : BelongsTo {
+        return $this->belongsTo(Schedule::class);
     }
 }
