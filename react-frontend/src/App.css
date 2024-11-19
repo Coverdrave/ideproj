@@ -10,6 +10,12 @@
     }
 }
 
+h1, h2, h3, h4, h5, h6 {
+    font-size: revert;
+    font-weight: revert;
+}
+
+/* 
 @layer components {
     input[type="text"],
     input[type="email"],
@@ -64,4 +70,4 @@
     .avatar {
         @apply w-8 h-8 rounded-full overflow-hidden object-center object-cover;
     }
-}
+} */
