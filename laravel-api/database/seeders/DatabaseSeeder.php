@@ -44,12 +44,12 @@ class DatabaseSeeder extends Seeder
             'name' => 'Дискретни структури и моделиране'
         ]);
 
-
         Schedule::create([
             'group' => '25A',
             'isWinterTerm' => true,
             'year' => '2024',
         ]);
+
         Schedule::create([
             'group' => '25B',
             'isWinterTerm' => true,
@@ -65,14 +65,27 @@ class DatabaseSeeder extends Seeder
             'isWinterTerm' => true,
             'year' => '2024',
         ]);
+        
 
-
-        UniClass::create([
-            'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            'schedule_id' => Schedule::where('group', '25A')->first()->id,
+        $class = new UniClass([
             'startHour' => 8,
             'room' => '2.209',
             'isExercise' => false,
         ]);
+        $class->subject()->associate(Subject::where('name', 'Микропроцесорни технологии')->first());
+        $class->schedule()->associate(Schedule::where('group', '25A')->first());
+        $class->save();
+
+        
+
+
+        // $class = UniClass::create([
+        //     'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
+        //     // 'schedule_id' => Schedule::where('group', '25A')->first()->id,
+        //     'startHour' => 8,
+        //     'room' => '2.209',
+        //     'isExercise' => false,
+        // ]);
+        // $class->schedule = $gr25A;
     }
 }

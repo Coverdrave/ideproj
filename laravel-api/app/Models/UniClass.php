@@ -12,8 +12,8 @@ class UniClass extends Model
     use HasFactory;
 
     protected $fillable = [
-        'subject_id',
-        'schedule_id',
+        // 'subject_id',
+        // 'schedule_id',
         'startHour',
         'duration',
         'room',

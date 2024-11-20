@@ -5,9 +5,18 @@ import './App.css'
 
 export default function App() {
   const [apiData, setApiData] = useState([])
-  
+
+  let days = {
+    0: 'Понеделник',
+    1: 'Вторник',
+    2: 'Сряда',
+    3: 'Четвъртък',
+    4: 'Петък'
+  };
+
+  let day = 0;
   let hour = 7;
-  // let day = 0;
+  let group = '25A';
 
 
   async function getApiData() {
@@ -21,15 +30,23 @@ export default function App() {
 
   useEffect(() => {
     getApiData();
-    console.log(apiData);
+    
   }, []);
 
+  function buildDaySchedule() {
+
+    return (
+      {
+
+      }
+    );
+  }
 
   return (
     <>
       <h1 className='mx-auto text-center'>Учебен разпис</h1>
 
-      <table>
+      <table className='table-bordered border-separate'>
         <thead>
           <tr>
             <th>Ден</th>
@@ -49,14 +66,11 @@ export default function App() {
         </thead>
         <tbody>
           <tr>
-            {
-              
-            }
             <td>
-              {apiData
-
-              }
+              {days[day++]}
+              {console.log(apiData)}
             </td>
+            {}
           </tr>
         </tbody>
       </table>

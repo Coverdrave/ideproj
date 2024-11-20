@@ -4,15 +4,16 @@ subject:
 
 class:
  -id
- -subject (1:1)
- -schedule (1:1)
+ -subject (belongsto)
+#  -schedule (1:1)
  -startHour (uint from 7 to 20)
  -duration (default 2)
  -room (string)
  -isExercise (bool)
 
 schedule:
- -id
- -group (string)
+#  -id (!remove!)
+ -group (string, make key)
  -isWinterTerm (bool)
  -year (date year)
+ -classes (hasmany)
