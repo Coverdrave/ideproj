@@ -16,6 +16,7 @@ export default function App() {
 
   let day = 0;
   let hour = 7;
+  let maxHour = 18;
   let group = '25A';
 
 
@@ -33,24 +34,15 @@ export default function App() {
     
   }, []);
 
-  function buildDaySchedule() {
-
-    return (
-      {
-
-      }
-    );
-  }
 
   return (
     <>
       <h1 className='mx-auto text-center'>Учебен разпис</h1>
 
-      <table className='table-bordered border-separate'>
+      {/* <table className='table-bordered border-separate'>
         <thead>
           <tr>
             <th>Ден</th>
-            <th>гр.</th>
             <th>7:00 - 7:45</th>
             <th>8:00 - 8:45</th>
             <th>9:00 - 9:45</th>
@@ -70,10 +62,30 @@ export default function App() {
               {days[day++]}
               {console.log(apiData)}
             </td>
-            {}
+            {apiData.sch.classes.map((uniClass, index) => (
+                <td key={index}>{uniClass.subject.name}</td>
+            ))}
           </tr>
         </tbody>
-      </table>
+      </table> */}
+
+      <div className='grid grid-cols-10'>
+        <div>Ден</div>
+        <div className='text-center mx-auto'>7:00 - 7:45</div>
+        <div>8:00 - 8:45</div>
+        <div>9:00 - 9:45</div>
+        <div>10:00 - 10:45</div>
+        <div>7:00 - 7:45</div>
+        <div>8:00 - 8:45</div>
+        <div>9:00 - 9:45</div>
+        <div>10:00 - 10:45</div>
+        <div>7:00 - 7:45</div>
+
+        <div>{days[day++]}</div>
+        {apiData.sch.classes.map((uniClass, index) => (
+          <div key={index} className='col-span-2 text-center'>{uniClass.subject.name}</div>
+        ))}
+      </div>
     </>
   )
 }
