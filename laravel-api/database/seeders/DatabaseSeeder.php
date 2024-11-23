@@ -73,7 +73,34 @@ class DatabaseSeeder extends Seeder
             'isExercise' => false,
         ]);
         $class->subject()->associate(Subject::where('name', 'Микропроцесорни технологии')->first());
-        $class->schedule()->associate(Schedule::where('group', '25A')->first());
+        $class->schedule()->associate(Schedule::find('25A'));
+        $class->save();
+
+        $class = new UniClass([
+            'startHour' => 12,
+            'room' => '1.317',
+            'isExercise' => false,
+        ]);
+        $class->subject()->associate(Subject::where('name', 'Компютърна периферия')->first());
+        $class->schedule()->associate(Schedule::find('25A'));
+        $class->save();
+
+        $class = new UniClass([
+            'startHour' => 10,
+            'room' => '6.208',
+            'isExercise' => true,
+        ]);
+        $class->subject()->associate(Subject::where('name', 'Интегрирани среди')->first());
+        $class->schedule()->associate(Schedule::find('25A'));
+        $class->save();
+
+        $class = new UniClass([
+            'startHour' => 14,
+            'room' => '6.206',
+            'isExercise' => true,
+        ]);
+        $class->subject()->associate(Subject::where('name', 'Микропроцесорни технологии')->first());
+        $class->schedule()->associate(Schedule::find('25A'));
         $class->save();
 
         

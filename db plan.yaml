@@ -1,19 +1,25 @@
 subject:
  -id
  -name (string)
+ -classes (hasmany)
 
 class:
  -id
- -subject (belongsto)
-#  -schedule (1:1)
- -startHour (uint from 7 to 20)
- -duration (default 2)
+ -startHour (int)
+ -duration (int, default 2)
  -room (string)
  -isExercise (bool)
+ -subject (belongsto)
+ -schedules (belongstomany)
+
 
 schedule:
-#  -id (!remove!)
- -group (string, make key)
+]-group (key)
+--id
+ -group (string)
+--subgroup (string)
+--day (int)
  -isWinterTerm (bool)
  -year (date year)
+--courseYear (int)
  -classes (hasmany)

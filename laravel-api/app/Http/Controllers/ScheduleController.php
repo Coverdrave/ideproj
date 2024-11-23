@@ -23,15 +23,20 @@ class ScheduleController extends Controller
         // ];
 
         $schedule = Schedule::find('25A');
+        
         foreach($schedule->classes as $class) {
             $ref = $class->subject;
-            // $schedule->classes[$class->startHour] = $class;
-            // unset($class);
         }
 
+        $schedule = $schedule->toArray();
 
+        usort($schedule['classes'], function ($a, $b) {
+            return $a['startHour'] <=> $b['startHour'];
+        });
+
+        
         return [
-            'sch' => $schedule,
+            'schedule' => $schedule,
             // 'classes' => $classes,
             // 'subjects' => Subject::all(),
             // 'classsessss' => UniClass::all(),
