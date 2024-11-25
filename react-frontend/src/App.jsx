@@ -22,6 +22,8 @@ export default function App() {
   // let group = '25A';
   // let reachedClass = 0;
 
+  let row = 0;
+
   // let buildRan = false;
 
 
@@ -41,34 +43,65 @@ export default function App() {
   }, []);
 
   function buildUniClasses() {
-    let classes = apiData.schedule.classes;
     let table = [];
-    let reachedClass = 0;
+    let end = [];
 
-    // buildRan = true;
+    let scheduleReached = 0;
 
-    for (let hour = minHour; hour < maxHour; hour++) {
-      if (reachedClass < classes.length && classes[reachedClass].startHour == hour) {
-        table.push(
-          <td key={hour} className='border bg-green-300' colSpan={classes[reachedClass].duration}>{classes[reachedClass].subject.name}</td>
-        );
-        
-        hour += classes[reachedClass].duration - 1;
-        reachedClass++;
-      }
-      else {
-        table.push(
-          <td key={hour} className='border'></td>
-        );
-      }
+    apiData.schedules.forEach(schedule => {
+      let classes = schedule.classes;
+      let reachedClass = 0;
 
-      // console.log(classes);
-      // console.log(reachedClass);
       
-    }
+      for (let hour = minHour; hour <= maxHour; hour++) {
+        if (reachedClass < classes.length && classes[reachedClass].startHour == hour) {
 
-    // console.log(table);
-    return table;
+          let objProps;
+          if (end.length != 0 && scheduleReached > 0 ) {
+            objProps = end[scheduleReached - 1].props?.children[hour - minHour]?.props;
+            // console.log(objProps)
+          }
+
+          if (objProps && objProps['data-subjectid'] > 0 && objProps['data-subjectid'] == classes[reachedClass].subject_id) {
+            // objProps['rowspan'] = (objProps['rowspan'] || 0) + 1;
+            // objProps = {...objProps, 'rowSpan': 2};
+            // end[scheduleReached - 1].props.children[hour - minHour].props = {...end[scheduleReached - 1].props.children[hour - minHour].props, 'rowSpan': 2}
+            // objProps.rowSpan = 2;
+            console.log(objProps);
+          }
+          else {
+            table.push(
+              <td key={day+'/'+hour+'/'+schedule.group+schedule.subgroup+schedule.isOddWeek} data-subjectid={classes[reachedClass].subject_id} className='border bg-green-300' rowSpan={1} colSpan={classes[reachedClass].duration}>{apiData.subjects[classes[reachedClass].subject_id].name}</td>
+            );
+          }
+
+          
+          
+          hour += classes[reachedClass].duration - 1;
+          reachedClass++;
+        }
+        else {
+          table.push(
+            <td key={day+'/'+hour+'/'+schedule.group+schedule.subgroup+schedule.isOddWeek} data-subjectid='-1' data-cellid={row+'/'+hour} className='border'></td>
+          );
+        }
+
+        // console.log(classes);
+        // console.log(reachedClass);
+        
+      }
+
+      scheduleReached++;
+
+      end.push(
+        <tr>{table}</tr>
+      );
+
+      table = [];
+    });
+
+    console.log(end);
+    return end;
   }
 
   return (
@@ -81,16 +114,13 @@ export default function App() {
             <tr className='border'>
               <th className='border'>Ден</th>
               {[...Array(maxHour - minHour + 1)].map((val, hour) => (
-                <th key={hour} data-cellid={day+'/'+hour} className='w-1/12 border'>{minHour + hour}:00 - {minHour + hour}:45</th>
+                <th key={hour} data-cellid={day+'/'+(minHour+hour)} className='w-1/12 border'>{minHour + hour}:00 - {minHour + hour}:45</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>
-                {days[day]}
-                {/* {console.log(apiData)} */}
-              </td>
+            <td rowSpan={5}>{days[day]}</td>
+            {apiData.length != 0 && buildUniClasses()}
               {/* {[...Array(maxHour - minHour)].map((val, hour) => (
                 apiData.length != 0 
                 && reachedClass < apiData.schedule.classes.length 
@@ -101,14 +131,13 @@ export default function App() {
                   <td key={hour} className='border'>{hour+minHour+'/'}</td>
                 )
                 ))} */}
-              {apiData.length != 0 && buildUniClasses()}
+              
               
               {/* {apiData.length != 0 ? (apiData.schedule.classes.map((uniClass, index) => (
                 <td key={index} className='border bg-green-300' colSpan={uniClass.duration}>{uniClass.subject.name}</td>
               ))) : (
                 <td></td>
               )} */}
-            </tr>
           </tbody>
         </table>
         {console.log(apiData)}

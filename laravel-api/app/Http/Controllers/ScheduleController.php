@@ -22,6 +22,9 @@ class ScheduleController extends Controller
         //     'sch' => $sch,
         // ];
 
+
+
+        /*
         $schedule = Schedule::find('25A');
         
         foreach($schedule->classes as $class) {
@@ -40,6 +43,46 @@ class ScheduleController extends Controller
             // 'classes' => $classes,
             // 'subjects' => Subject::all(),
             // 'classsessss' => UniClass::all(),
+        ];
+        */
+
+        $sch = Schedule::where('group', '25')
+                        ->where('year', '2024')
+                        ->where('courseYear', 3)
+                        ->where('isWinterTerm', true)
+                        ->orderBy('day', 'asc')
+                        ->orderBy('subgroup', 'asc')
+                        ->orderBy('isOddWeek', 'desc')
+                        ->get();
+
+        if ($sch->count() == 0) {
+            return [
+                'error' => 'No schedule found.'
+            ];
+        }
+
+        
+
+        foreach($sch as $schedule) {
+            $schedule->classes;
+        }
+
+        $sch = $sch->toArray();
+
+        foreach($sch as &$schedule) {
+            $sortValues = array_column($schedule['classes'], 'startHour');
+            array_multisort($sortValues, SORT_ASC, $schedule['classes']);
+        }
+
+        $subj = [];
+
+        foreach(Subject::all() as $subject) {
+            $subj[$subject->id] = $subject;
+        }
+
+        return [
+            'schedules' => $sch,
+            'subjects' => $subj
         ];
     }
 

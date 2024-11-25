@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             // $table->foreignId('subject_id');
             // $table->foreignId('schedule_id');
+            // $table->integer('day');
             $table->integer('startHour');
             $table->integer('duration')->default(2);
             $table->string('room');
@@ -24,7 +25,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreignIdFor(Subject::class)->constrained();
-            $table->foreignIdFor(Schedule::class)->constrained();
+            // $table->foreignIdFor(Schedule::class)->constrained();
         });
     }
 

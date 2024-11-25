@@ -13,10 +13,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('schedules', function (Blueprint $table) {
-            // $table->id();
-            $table->string('group')->primary();
+            $table->id();
+            $table->string('group');
+            $table->string('subgroup');
+            // $table->enum('subgroup', ['A', 'B']);
+            $table->integer('day');
+            // $table->enum('day', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']);
+            $table->boolean('isOddWeek');
+            // $table->enum('week', ['odd', 'even']);
             $table->boolean('isWinterTerm');
+            // $table->enum('term', ['winter', 'summer']);
             $table->year('year');
+            $table->integer('courseYear');
             $table->timestamps();
 
             // $table->foreignIdFor(UniClass::class)->constrained();

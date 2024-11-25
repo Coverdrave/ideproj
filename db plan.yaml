@@ -10,16 +10,26 @@ class:
  -room (string)
  -isExercise (bool)
  -subject (belongsto)
- -schedules (belongstomany)
+]-schedules (belongstomany)
 
 
 schedule:
-]-group (key)
 --id
- -group (string)
---subgroup (string)
+--group (string)
+--subgroup (enum)
 --day (int)
+--isOddWeek (bool)
  -isWinterTerm (bool)
  -year (date year)
 --courseYear (int)
  -classes (hasmany)
+
+
+
+
+
+
+ schedules_classes:
+ -id
+ -schedule_id
+ -class_id
