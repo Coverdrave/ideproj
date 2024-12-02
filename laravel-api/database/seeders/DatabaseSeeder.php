@@ -221,6 +221,52 @@ class DatabaseSeeder extends Seeder
                 'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
             ])->id,
         ]);
+
+        Schedule::create([
+            'group' => '25',
+            'subgroup' => 'A',
+            'day' => 2,
+            'isOddWeek' => false,
+            'isWinterTerm' => true,
+            'year' => '2024',
+            'courseYear' => 3
+        ])->classes()->attach([
+            UniClass::firstOrCreate([
+                'startHour' => 8,
+                'room' => '2Г.105',
+                'isExercise' => false,
+                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
+            ])->id,
+            UniClass::firstOrCreate([
+                'startHour' => 10,
+                'room' => '2.203',
+                'isExercise' => false,
+                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
+            ])->id,
+        ]);
+
+        Schedule::create([
+            'group' => '25',
+            'subgroup' => 'А',
+            'day' => 2,
+            'isOddWeek' => true,
+            'isWinterTerm' => true,
+            'year' => '2024',
+            'courseYear' => 3
+        ])->classes()->attach([
+            UniClass::firstOrCreate([
+                'startHour' => 10,
+                'room' => '2.203',
+                'isExercise' => false,
+                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
+            ])->id,
+            UniClass::firstOrCreate([
+                'startHour' => 14,
+                'room' => '6.306',
+                'isExercise' => true,
+                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
+            ])->id,
+        ]);
         // $gr_25A = Schedule::create([
         //     'group' => '25',
         //     'subgroup' => 'A',
