@@ -33,6 +33,9 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+      "react/jsx-key": [
+        'false'
+      ],
     },
   },
 ]
