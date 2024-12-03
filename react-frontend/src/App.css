@@ -5,14 +5,43 @@
 @tailwind utilities;
 
 @layer base {
-    body {
-        font-family: "Poppins", sans-serif;
-    }
+  body {
+    font-family: "Poppins", sans-serif;
+  }
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-size: revert;
-    font-weight: revert;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: revert;
+  font-weight: revert;
+}
+
+@layer components {
+  table {
+    @apply table-fixed text-center border-2 border-black mx-auto;
+  }
+  tbody tr {
+    @apply h-16;
+  }
+  tbody tr:nth-child(4n) {
+    @apply border border-black border-b-2;
+  }
+  th {
+    @apply w-1/12 border-2 border-black whitespace-nowrap p-1;
+  }
+  td {
+    @apply border border-black;
+  }
+  td.classes {
+    @apply min-w-max;
+  }
+  td.weeks {
+    @apply border-r-2;
+  }
 }
 
 /* 

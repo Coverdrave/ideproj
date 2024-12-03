@@ -13,12 +13,12 @@ export default function App() {
     2: "Сряда",
     3: "Четвъртък",
     4: "Петък",
-  }
+  };
 
   let week = {
     0: "Нечетна",
     1: "Четна",
-  }
+  };
 
   let minHour = 7;
   let maxHour = 18;
@@ -29,14 +29,16 @@ export default function App() {
   function getClassRowSpan(scheduleIndex, classId) {
     let span = 1;
 
-    for (let i = scheduleIndex + 1; i < (Math.floor(scheduleIndex / 4) + 1) * 4; i++) {
+    for (
+      let i = scheduleIndex + 1;
+      i < (Math.floor(scheduleIndex / 4) + 1) * 4;
+      i++
+    ) {
       if (i == apiData.schedules.length) {
         return span;
       }
 
-      const classBelow = apiData.schedules[
-        i
-      ].classes?.find(
+      const classBelow = apiData.schedules[i].classes?.find(
         (c) => c.id === classId
       );
       if (classBelow) {
@@ -49,7 +51,6 @@ export default function App() {
 
     return span;
   }
-
 
   async function getApiData() {
     const res = await fetch("/api/schedule");
@@ -66,22 +67,20 @@ export default function App() {
 
   console.log(apiData && apiData.schedules);
 
-  return (
+  return apiData && apiData.schedules ? (
     <>
-      <div className="mx-[10vw]">
+      <div className="mx-[10vw] mb-40">
         <h1 className="mx-auto text-center mt-5 mb-5">Учебен разпис</h1>
 
-        <table className="table-fixed text-center border-2 border-black mx-auto">
+        <p className="">КУРС: {}</p>
+        <table>
           <thead>
-            <tr className="border">
-              <th className="border">Ден</th>
-              <th className="border">пгр.</th>
-              <th className="border">Седмица</th>
+            <tr>
+              <th>Ден</th>
+              <th>пгр.</th>
+              <th>Седмица</th>
               {[...Array(maxHour - minHour + 1)].map((val, hour) => (
-                <th
-                  key={hour}
-                  className="w-1/12 border"
-                >
+                <th key={hour}>
                   {minHour + hour}:00 - {minHour + hour}:45
                 </th>
               ))}
@@ -94,11 +93,19 @@ export default function App() {
                 hourReached = 0;
 
                 return (
-                  <tr className="border border-black">
-                    {scheduleIndex % 4 === 0 && <td className="border" rowSpan={4}>{days[scheduleIndex / 4]}</td>}
-                    {scheduleIndex % 2 === 0 && <td className="border" rowSpan={2}>{schedule.subgroup}</td>}
-                    <td className="border">{week[scheduleIndex % 2]}</td>
-                    
+                  <tr>
+                    {scheduleIndex % 4 === 0 && (
+                      <td className="days" rowSpan={4}>
+                        {days[scheduleIndex / 4]}
+                      </td>
+                    )}
+                    {scheduleIndex % 2 === 0 && (
+                      <td className="subgroups" rowSpan={2}>
+                        {schedule.subgroup}
+                      </td>
+                    )}
+                    <td className="weeks">{week[scheduleIndex % 2]}</td>
+
                     {[...Array(maxHour - minHour + 1)].map((val, hour) => {
                       const uniClass = apiData.schedules[
                         scheduleIndex
@@ -116,18 +123,26 @@ export default function App() {
 
                       return (
                         <td
-                          className={uniClass ? "border bg-cyan-200" : "border"}
+                          className={
+                            uniClass ? "classes bg-cyan-200" : "classes"
+                          }
                           colSpan={uniClass ? uniClass.duration : 1}
                           rowSpan={
-                            uniClass ? getClassRowSpan(scheduleIndex, uniClass.id) : 1
+                            uniClass
+                              ? getClassRowSpan(scheduleIndex, uniClass.id)
+                              : 1
                           }
                         >
-                          {uniClass
-                            ? <>{apiData.subjects[uniClass.subject_id].name}<br></br>
-                                {uniClass.isExercise ? 'пу, ' : 'л, '}
-                                {uniClass.room}
-                              </>
-                            : ""}
+                          {uniClass ? (
+                            <>
+                              {apiData.subjects[uniClass.subject_id].name}
+                              <br></br>
+                              {uniClass.isExercise ? "пу, " : "л, "}
+                              {uniClass.room}
+                            </>
+                          ) : (
+                            ""
+                          )}
                         </td>
                       );
                     })}
@@ -138,5 +153,7 @@ export default function App() {
         </table>
       </div>
     </>
+  ) : (
+    <></>
   );
 }
