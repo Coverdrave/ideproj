@@ -69,7 +69,7 @@ export default function App() {
 
   return apiData && apiData.schedules ? (
     <>
-      <div className="mx-[10vw] mb-40">
+      <div className="mx-32 mb-40">
         <h1 className="mx-auto text-center mt-5 mb-5">Учебен разпис</h1>
 
         <p className="">КУРС: {}</p>
@@ -80,7 +80,7 @@ export default function App() {
               <th>пгр.</th>
               <th>Седмица</th>
               {[...Array(maxHour - minHour + 1)].map((val, hour) => (
-                <th key={hour}>
+                <th key={hour} className="hours">
                   {minHour + hour}:00 - {minHour + hour}:45
                 </th>
               ))}
@@ -107,13 +107,13 @@ export default function App() {
                     <td className="weeks">{week[scheduleIndex % 2]}</td>
 
                     {[...Array(maxHour - minHour + 1)].map((val, hour) => {
-                      const uniClass = apiData.schedules[
-                        scheduleIndex
-                      ].classes?.find((c) => c.startHour === hour + minHour);
-
                       if (hourReached > hour) {
                         return null;
                       }
+
+                      const uniClass = apiData.schedules[
+                        scheduleIndex
+                      ].classes?.find((c) => c.startHour === hour + minHour);
 
                       hourReached += uniClass ? uniClass.duration : 1;
 

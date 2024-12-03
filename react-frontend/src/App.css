@@ -21,23 +21,26 @@ h6 {
 }
 
 @layer components {
-  table {
-    @apply table-fixed text-center border-2 border-black mx-auto;
-  }
-  tbody tr {
-    @apply h-16;
-  }
-  tbody tr:nth-child(4n) {
-    @apply border border-black border-b-2;
-  }
-  th {
-    @apply w-1/12 border-2 border-black whitespace-nowrap p-1;
-  }
-  td {
+  table, th, tr, td {
     @apply border border-black;
   }
-  td.classes {
-    @apply min-w-max;
+  table {
+    @apply table-fixed text-center border-2 mx-auto shadow-md bg-gray-100 ;
+  }
+  tbody tr {
+    @apply max-h-14 h-14;
+  }
+  tbody tr:nth-child(4n) {
+    @apply border-b-2;
+  }
+  th {
+    @apply border-2 whitespace-nowrap p-1;
+  }
+  th.hours {
+    @apply min-w-28;
+  }
+  td.days {
+    @apply p-1;
   }
   td.weeks {
     @apply border-r-2;
