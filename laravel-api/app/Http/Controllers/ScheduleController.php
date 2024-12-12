@@ -6,10 +6,11 @@ use App\Models\Schedule;
 use App\Models\Subject;
 use App\Models\UniClass;
 use Illuminate\Http\Request;
+use PHPUnit\Framework\Attributes\Group;
 
 class ScheduleController extends Controller
 {
-    public function index() {
+    public function index(Request $request) {
         // $class = UniClass::all()->first();
         // $subj = $class->subject;
         // $sch = $class->schedule;
@@ -46,18 +47,27 @@ class ScheduleController extends Controller
         ];
         */
 
-        $sch = Schedule::where('group', '25')
-                        ->where('year', '2024')
-                        ->where('courseYear', 3)
-                        ->where('isWinterTerm', true)
-                        ->orderBy('day', 'asc')
-                        ->orderBy('subgroup', 'asc')
-                        ->orderBy('isOddWeek', 'desc')
-                        ->get();
+        // return $request;
+
+        $request->validate([
+            'group' => 'required|integer',
+            'year' => 'required|integer',
+            'courseYear' => 'required|integer',
+            'isWinterTerm' => 'required|boolean'
+        ]);
+
+        $sch = Schedule::where('group', $request->group)
+                       ->where('year', $request->year)
+                       ->where('courseYear', $request->courseYear)
+                       ->where('isWinterTerm', $request->isWinterTerm)
+                       ->orderBy('day', 'asc')
+                       ->orderBy('subgroup', 'asc')
+                       ->orderBy('isOddWeek', 'desc')
+                       ->get();
 
         if ($sch->count() == 0) {
             return [
-                'error' => 'No schedule found.'
+                'error' => 'No schedule found'
             ];
         }
 

@@ -1,0 +1,28 @@
+@import '../App.css';
+
+@layer components {
+    table, th, tr, td {
+      @apply border border-black;
+    }
+    table {
+      @apply table-fixed text-center border-2 mx-auto shadow-md bg-gray-100 ;
+    }
+    tbody tr {
+      @apply max-h-14 h-14;
+    }
+    tbody tr:nth-child(4n) {
+      @apply border-b-2;
+    }
+    th {
+      @apply border-2 whitespace-nowrap p-1;
+    }
+    th.hours {
+      @apply min-w-28 w-28;
+    }
+    td.days {
+      @apply p-1;
+    }
+    td.weeks {
+      @apply border-r-2;
+    }
+}

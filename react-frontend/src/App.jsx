@@ -1,59 +1,23 @@
 import { useEffect, useState } from "react";
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
 import "./App.css";
-// import { build } from 'vite';
+import SchedulesTable from "./components/SchedulesTable";
 
 export default function App() {
   const [apiData, setApiData] = useState([]);
+  const [group, setGroup] = useState('25');
+  const [year, setYear] = useState('2024');
+  const [courseYear, setCourseYear] = useState('3');
+  const [isWinterTerm, setIsWinterTerm] = useState(true);
 
-  let days = {
-    0: "Понеделник",
-    1: "Вторник",
-    2: "Сряда",
-    3: "Четвъртък",
-    4: "Петък",
-  };
-
-  let week = {
-    0: "Нечетна",
-    1: "Четна",
-  };
-
-  let minHour = 7;
-  let maxHour = 18;
-
-  let hourReached = 0;
-  const skippedClasses = [];
-
-  function getClassRowSpan(scheduleIndex, classId) {
-    let span = 1;
-
-    for (
-      let i = scheduleIndex + 1;
-      i < (Math.floor(scheduleIndex / 4) + 1) * 4;
-      i++
-    ) {
-      if (i == apiData.schedules.length) {
-        return span;
-      }
-
-      const classBelow = apiData.schedules[i].classes?.find(
-        (c) => c.id === classId
-      );
-      if (classBelow) {
-        skippedClasses.push(classBelow.id);
-        span++;
-      } else {
-        break;
-      }
-    }
-
-    return span;
-  }
 
   async function getApiData() {
-    const res = await fetch("/api/schedule");
+    // const res = await fetch("/api/schedule");
+    const res = await fetch("/api/schedule?" + new URLSearchParams({
+      group: group,
+      year: year,
+      courseYear: courseYear,
+      isWinterTerm: isWinterTerm == true ? 1 : 0,
+    }).toString());
     const data = await res.json();
 
     if (res.ok) {
@@ -65,95 +29,53 @@ export default function App() {
     getApiData();
   }, []);
 
-  console.log(apiData && apiData.schedules);
+  console.log(apiData);
 
-  return apiData && apiData.schedules ? (
-    <>
-      <div className="mx-32 mb-40">
-        <h1 className="mx-auto text-center mt-5 mb-5">Учебен разпис</h1>
+  return (
+    <> 
+    <div className="mx-40">
+      <div className="relative text-center mt-5 mb-10">
+        <h1>Учебен разпис</h1>
 
-        <p className="">КУРС: {}</p>
-        <table>
-          <thead>
-            <tr>
-              <th>Ден</th>
-              <th>пгр.</th>
-              <th>Седмица</th>
-              {[...Array(maxHour - minHour + 1)].map((val, hour) => (
-                <th key={hour} className="hours">
-                  {minHour + hour}:00 - {minHour + hour}:45
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {apiData &&
-              apiData.schedules &&
-              apiData.schedules.map((schedule, scheduleIndex) => {
-                hourReached = 0;
-
-                return (
-                  <tr>
-                    {scheduleIndex % 4 === 0 && (
-                      <td className="days" rowSpan={4}>
-                        {days[scheduleIndex / 4]}
-                      </td>
-                    )}
-                    {scheduleIndex % 2 === 0 && (
-                      <td className="subgroups" rowSpan={2}>
-                        {schedule.subgroup}
-                      </td>
-                    )}
-                    <td className="weeks">{week[scheduleIndex % 2]}</td>
-
-                    {[...Array(maxHour - minHour + 1)].map((val, hour) => {
-                      if (hourReached > hour) {
-                        return null;
-                      }
-
-                      const uniClass = apiData.schedules[
-                        scheduleIndex
-                      ].classes?.find((c) => c.startHour === hour + minHour);
-
-                      hourReached += uniClass ? uniClass.duration : 1;
-
-                      if (uniClass && skippedClasses.includes(uniClass.id)) {
-                        return null;
-                      }
-
-                      return (
-                        <td
-                          className={
-                            uniClass ? "classes bg-cyan-200" : "classes"
-                          }
-                          colSpan={uniClass ? uniClass.duration : 1}
-                          rowSpan={
-                            uniClass
-                              ? getClassRowSpan(scheduleIndex, uniClass.id)
-                              : 1
-                          }
-                        >
-                          {uniClass ? (
-                            <>
-                              {apiData.subjects[uniClass.subject_id].name}
-                              <br></br>
-                              {uniClass.isExercise ? "пу, " : "л, "}
-                              {uniClass.room}
-                            </>
-                          ) : (
-                            ""
-                          )}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-          </tbody>
-        </table>
+        <div className="absolute top-1/4 right-0">
+          Група: {
+            <select name="group" id="group" onChange={(e)=>(setGroup(e.target.value))}>
+              <option value="25">25</option>
+            </select>
+          }
+          &emsp;
+          Година: {
+            <input className="w-14" type="number" name="year" id="year" defaultValue={year} onChange={(e)=>(setYear(e.target.value))}/>
+          }
+          &emsp;
+          Курс: {
+            <input className="w-7" type="number" name="courseYear" id="courseYear" defaultValue={courseYear} min={1} max={5} onChange={(e)=>(setCourseYear(e.target.value))}/>
+          }
+          &emsp;
+          Семестър: {
+            <select name="term" id="term" onChange={(e)=>(setIsWinterTerm(e.target.value))}>
+              <option value={1}>Зимен</option>
+              <option value={0}>Летен</option>
+            </select>
+          }
+          &emsp;
+          <button onClick={()=>(getApiData())}>
+            ???
+          </button>
+        </div>
       </div>
+    </div>
+      
+
+      {apiData && apiData.schedules 
+        ? <div className="max-w-max min-w-max mx-auto mb-40">
+            <SchedulesTable
+              apiData={apiData}
+            /> 
+          </div>
+        : (apiData.error && <p className="font-extrabold text-6xl text-center my-[30vh]">{apiData.error}</p>)
+      }
+
     </>
-  ) : (
-    <></>
-  );
+  )
 }
