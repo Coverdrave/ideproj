@@ -12,4 +12,7 @@ Route::get('/', function () {
     return 'API';
 });
 
-Route::apiResource('schedule', ScheduleController::class);
+// Route::apiResource('schedule', ScheduleController::class);
+
+Route::get('/schedule', [ScheduleController::class, 'index']);
+Route::get('/schedule/all', [ScheduleController::class, 'all']);

@@ -1,6 +1,6 @@
-import './SchedulesTable.css';
+import "./SchedulesTable.css";
 
-export default function SchedulesTable({apiData}) {
+export default function SchedulesTable({ apiData }) {
   const days = {
     0: "Понеделник",
     1: "Вторник",
@@ -49,22 +49,28 @@ export default function SchedulesTable({apiData}) {
   return (
     <>
       <div>
-          <p className="font-bold float-left">КУРС: {apiData.schedules[0].courseYear} &emsp; ГРУПА: {apiData.schedules[0].group}</p>
-          <p className="font-bold float-right">{apiData.schedules[0].isWinterTerm == 1 ? "ЗИМЕН" : "ЛЕТЕН"} СЕМЕСТЪР &emsp; {apiData.schedules[0].year}/{apiData.schedules[0].year+1}г.</p>
+        <p className="font-bold float-left">
+          КУРС: {apiData.schedules[0].courseYear} &emsp; ГРУПА:{" "}
+          {apiData.schedules[0].group}
+        </p>
+        <p className="font-bold float-right">
+          {apiData.schedules[0].isWinterTerm == 1 ? "ЗИМЕН" : "ЛЕТЕН"} СЕМЕСТЪР
+          &emsp; {apiData.schedules[0].year}/{apiData.schedules[0].year + 1}г.
+        </p>
       </div>
-      
+
       <table>
         <thead>
-            <tr>
+          <tr>
             <th>Ден</th>
             <th>пгр.</th>
             <th>Седмица</th>
             {[...Array(maxHour - minHour + 1)].map((val, hour) => (
-                <th key={hour} className="hours">
+              <th key={hour} className="hours">
                 {minHour + hour}:00 - {minHour + hour}:45
-                </th>
+              </th>
             ))}
-            </tr>
+          </tr>
         </thead>
         <tbody>
           {apiData.schedules.map((schedule, scheduleIndex) => {
@@ -73,14 +79,14 @@ export default function SchedulesTable({apiData}) {
             return (
               <tr>
                 {scheduleIndex % 4 === 0 && (
-                <td className="days" rowSpan={4}>
-                  {days[scheduleIndex / 4]}
-                </td>
+                  <td className="days" rowSpan={4}>
+                    {days[scheduleIndex / 4]}
+                  </td>
                 )}
                 {scheduleIndex % 2 === 0 && (
-                <td className="subgroups" rowSpan={2}>
-                  {schedule.subgroup}
-                </td>
+                  <td className="subgroups" rowSpan={2}>
+                    {schedule.subgroup}
+                  </td>
                 )}
                 <td className="weeks">{week[scheduleIndex % 2]}</td>
 
@@ -101,24 +107,23 @@ export default function SchedulesTable({apiData}) {
 
                   return (
                     <td
-                      className={
-                        uniClass ? "classes bg-cyan-200" : "classes"
-                      }
+                      className={uniClass ? "classes bg-cyan-200" : "classes"}
                       colSpan={uniClass ? uniClass.duration : 1}
                       rowSpan={
-                        uniClass
-                        ? getClassRowSpan(scheduleIndex, uniClass.id)
-                        : 1
+                        uniClass &&
+                        !(uniClass.isExercise && scheduleIndex % 2 == 1)
+                          ? getClassRowSpan(scheduleIndex, uniClass.id)
+                          : 1
                       }
-                      >
+                    >
                       {uniClass ? (
                         <>
                           {apiData.subjects[uniClass.subject_id].name}
-                          <br/>
+                          <br />
                           {uniClass.isExercise ? "пу, " : "л, "}
                           {uniClass.room}
                         </>
-                        ) : (
+                      ) : (
                         ""
                       )}
                     </td>
@@ -130,5 +135,5 @@ export default function SchedulesTable({apiData}) {
         </tbody>
       </table>
     </>
-  )
+  );
 }

@@ -6,11 +6,16 @@ use App\Models\Schedule;
 use App\Models\Subject;
 use App\Models\UniClass;
 use Illuminate\Http\Request;
-use PHPUnit\Framework\Attributes\Group;
+use Illuminate\Support\Facades\DB;
 
 class ScheduleController extends Controller
 {
     public function index(Request $request) {
+        // dd ($request);
+        // dd ($request->group);
+
+
+
         // $class = UniClass::all()->first();
         // $subj = $class->subject;
         // $sch = $class->schedule;
@@ -47,27 +52,18 @@ class ScheduleController extends Controller
         ];
         */
 
-        // return $request;
-
-        $request->validate([
-            'group' => 'required|integer',
-            'year' => 'required|integer',
-            'courseYear' => 'required|integer',
-            'isWinterTerm' => 'required|boolean'
-        ]);
-
         $sch = Schedule::where('group', $request->group)
-                       ->where('year', $request->year)
-                       ->where('courseYear', $request->courseYear)
-                       ->where('isWinterTerm', $request->isWinterTerm)
-                       ->orderBy('day', 'asc')
-                       ->orderBy('subgroup', 'asc')
-                       ->orderBy('isOddWeek', 'desc')
-                       ->get();
+                        ->where('year', $request->year)
+                        ->where('courseYear', $request->courseYear)
+                        ->where('isWinterTerm', $request->isWinterTerm == 1 ? true : false)
+                        ->orderBy('day', 'asc')
+                        ->orderBy('subgroup', 'asc')
+                        ->orderBy('isOddWeek', 'desc')
+                        ->get();
 
         if ($sch->count() == 0) {
             return [
-                'error' => 'No schedule found'
+                'error' => 'No schedule found.'
             ];
         }
 
@@ -94,6 +90,13 @@ class ScheduleController extends Controller
             'schedules' => $sch,
             'subjects' => $subj
         ];
+    }
+
+    public function all() {
+        return DB::table('schedules')
+                    ->select('group', 'year', 'courseYear', 'isWinterTerm')
+                    ->distinct()
+                    ->get();
     }
 
 
