@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./App.css";
 import SchedulesTable from "./components/SchedulesTable";
 import ChangeScheduleModal from "./components/ChangeScheduleModal";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function App() {
   const [apiData, setApiData] = useState([]);
@@ -34,6 +36,20 @@ export default function App() {
     setIsWinterTerm(isWinterTerm == 1 ? true : false);
   }
 
+  function tableToPDF() {
+    const tbl = document.getElementById("scheduleTblDiv");
+    html2canvas(tbl, {
+      width: "2000",
+      height: "2000",
+    }).then((canvas) => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({orientation: "landscape", format: "a3"});
+      pdf.addImage(imgData, 'JPEG', 0, 0);
+      // pdf.output('dataurlnewwindow');
+      pdf.save(`schedule_${group}_${year}_${courseYear}_${isWinterTerm}.pdf`);
+    });
+  }
+
   useEffect(() => {
     getApiData();
   }, []);
@@ -42,7 +58,7 @@ export default function App() {
     getApiData();
   }, [group, year, courseYear, isWinterTerm]);
 
-  console.log(apiData);
+  // console.log(apiData);
 
   return (
     <>
@@ -106,8 +122,9 @@ export default function App() {
       </div>
 
       {apiData && apiData.schedules ? (
-        <div className="max-w-max min-w-max mx-auto mb-40">
+        <div id="scheduleTblDiv" className="max-w-max min-w-max mx-auto mb-40">
           <SchedulesTable apiData={apiData} />
+          <button onClick={() => (tableToPDF())}>hello</button>
         </div>
       ) : (
         apiData.error && (

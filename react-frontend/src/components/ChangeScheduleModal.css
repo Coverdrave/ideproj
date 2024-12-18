@@ -1,86 +1,34 @@
-.modal {
-  font-size: 12px;
-}
-.modal > .header {
-  width: min-content;
-  border-bottom: 1px solid gray;
-  font-size: 18px;
-  text-align: center;
-  padding: 5px;
-}
-.modal > .content {
-  width: min-content;
-  padding: 10px 5px;
-}
-.modal > .actions {
-  width: 100%;
-  padding: 10px 5px;
-  margin: auto;
-  text-align: center;
-}
-.modal > .close {
-  cursor: pointer;
-  position: absolute;
-  display: block;
-  padding: 2px 5px;
-  line-height: 20px;
-  right: -10px;
-  top: -10px;
-  font-size: 24px;
-  background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid #cfcece;
-}
-/* .modal {
-  font-size: 12px;
-}
-.modal > .header {
-  width: 100%;
-  border-bottom: 1px solid gray;
-  font-size: 18px;
-  text-align: center;
-  padding: 5px;
-}
-.modal > .content {
-  width: 100%;
-  padding: 10px 5px;
-}
-.modal > .actions {
-  width: 100%;
-  padding: 10px 5px;
-  margin: auto;
-  text-align: center;
-}
-.modal > .close {
-  cursor: pointer;
-  position: absolute;
-  display: block;
-  padding: 2px 5px;
-  line-height: 20px;
-  right: -10px;
-  top: -10px;
-  font-size: 24px;
-  background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid #cfcece;
-} */
-
 @tailwind components;
 
 @layer components {
-  table.modal,
-  table.modal th,
-  table.modal tr,
-  table.modal td {
+  .modal {
+    @apply text-lg w-min p-1;
+  }
+  .modal > .header {
+    @apply w-min mx-auto border-b border-solid border-gray-500 text-2xl text-center whitespace-nowrap;
+  }
+  .modal > .content {
+    @apply w-min mx-auto mt-6;
+  }
+  .modal > .actions {
+    @apply px-[10px] py-[5px] m-auto text-center;
+  }
+  .modal > .close {
+    @apply cursor-pointer absolute block py-[2px] px-[5px] leading-5 -right-2 -top-2 text-2xl bg-white rounded-2xl border border-solid;
+  }
+  table.schedules,
+  table.schedules th,
+  table.schedules tr,
+  table.schedules td {
     @apply border-0 bg-gray-100 p-0;
   }
-  table.modal th {
+  table.schedules th {
     @apply p-1 border-x;
   }
-  table.modal tr {
+  table.schedules tr {
     @apply border h-8;
   }
-  table.modal tr:hover td {
+  table.schedules tr:hover td {
     @apply bg-gray-300 cursor-pointer;
   }
 }
@@ -104,6 +52,10 @@
     box-shadow: 0 0 500px rgba(241, 241, 241, 0);
   }
 }
+
 .popup-content {
   -webkit-animation: anvil 0.3s cubic-bezier(0.38, 0.1, 0.36, 0.9) forwards;
+  
+  width: min-content !important;
+  border-radius: 12px;
 }

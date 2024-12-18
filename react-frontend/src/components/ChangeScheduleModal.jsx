@@ -1,6 +1,7 @@
 import Popup from "reactjs-popup";
-import "reactjs-popup/dist/index.css";
+
 import "./ChangeScheduleModal.css";
+import "reactjs-popup/dist/index.css";
 import { useEffect, useState } from "react";
 
 export default function App({ updateData }) {
@@ -38,7 +39,7 @@ export default function App({ updateData }) {
           <div className="header"> Избери група </div>
           <div className="content">
             {allSchedules ? (
-              <table className="modal">
+              <table className="schedules">
                 <thead>
                   <tr>
                     <th>Група</th>

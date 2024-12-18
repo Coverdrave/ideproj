@@ -2,7 +2,7 @@
 
 @layer components {
     table, th, tr, td {
-      @apply border border-black;
+      @apply border border-black text-lg;
     }
     table {
       @apply table-fixed text-center border-2 mx-auto shadow-md bg-gray-100 ;
