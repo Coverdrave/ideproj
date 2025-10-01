@@ -67,7 +67,6 @@ class ScheduleController extends Controller
             ];
         }
 
-        
 
         foreach($sch as $schedule) {
             $schedule->classes;
@@ -99,5 +98,41 @@ class ScheduleController extends Controller
                     ->get();
     }
 
+    public function create(Request $request) {
+        $validated = $request->validate([
+            'group' => 'required|string|max:255',
+            'year' => 'required|integer',
+            'courseYear' => 'required|integer',
+        ]);
 
+        $subgroup = ['A', 'B'];
+        $day = [0, 1, 2, 3, 4, 5, 6];
+        $isOddWeek = [false, true];
+        $isWinterTerm = [false, true];
+
+        foreach ($subgroup as $sg) {
+           foreach ($day as $d) {
+                foreach ($isOddWeek as $week) {
+                    foreach ($isWinterTerm as $term) {
+                        $schedule = new Schedule([
+                            'group' => $request->group,
+                            'year' => $request->year,
+                            'courseYear' => $request->courseYear,
+
+                            'subgroup' => $sg,
+                            'day' => $d,
+                            'isOddWeek' => $week,
+                            'isWinterTerm' => $term,
+                        ]);
+
+                        $schedule->save();
+                    }
+                }
+           }
+        }
+
+        return response()->json([
+            'message' => 'Успешно създаване',
+        ], 201);
+    }
 }

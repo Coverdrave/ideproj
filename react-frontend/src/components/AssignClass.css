@@ -8,7 +8,7 @@
     @apply w-min mx-auto border-b border-solid border-gray-500 text-2xl text-center whitespace-nowrap;
   }
   .modal > .content {
-    @apply w-min mx-auto mt-6;
+    @apply w-max mx-auto mt-6;
   }
   .modal > .actions {
     @apply px-[10px] py-[5px] m-auto text-center;
@@ -16,11 +16,8 @@
   .modal > .close {
     @apply cursor-pointer absolute block py-[2px] px-[5px] leading-5 -right-2 -top-2 text-2xl bg-white rounded-2xl border border-solid;
   }
-  table.schedules,
-  table.schedules th,
-  table.schedules tr,
-  table.schedules td {
-    @apply border-0  p-0;
+  table.schedules {
+    @apply border-collapse border-0 p-0;
   }
   table.schedules th {
     @apply p-1 border-x;
@@ -30,6 +27,28 @@
   }
   table.schedules tr:hover td {
     @apply bg-gray-300 cursor-pointer;
+  }
+  table.schedules tr.selected {
+    @apply bg-gray-300;
+  }
+  table.schedules td {
+    @apply px-2;
+  }
+
+  select {
+    @apply rounded-lg border-black border ml-1 px-1 mt-2;
+  }
+
+  button.multipleOptions {
+    @apply rounded-md border bg-gray-100 mx-1 px-1;
+  }
+
+  button.selectedOption {
+    @apply bg-gray-300;
+  }
+
+  div.selectable {
+    @apply pt-2;
   }
 }
 
@@ -58,4 +77,20 @@
   
   width: min-content !important;
   border-radius: 12px;
+}
+
+.loader {
+  height: 30px;
+  aspect-ratio: 6;
+  --c: #0000 64%,#000 66% 98%,#0000 101%;
+  background:
+    radial-gradient(35% 146% at 50% 159%,var(--c)) 0 0,
+    radial-gradient(35% 146% at 50% -59%,var(--c)) 25% 100%;
+  background-size: calc(100%/3) 50%;
+  background-repeat: repeat-x;
+  clip-path: inset(0 60% 0 0);
+  animation: l6 .8s infinite linear alternate;
+}
+@keyframes l6{
+  to {clip-path: inset(0 0 0 60%)}
 }

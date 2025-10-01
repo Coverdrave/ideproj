@@ -8,7 +8,7 @@
     @apply w-min mx-auto border-b border-solid border-gray-500 text-2xl text-center whitespace-nowrap;
   }
   .modal > .content {
-    @apply w-min mx-auto mt-6;
+    @apply w-max mx-auto mt-6;
   }
   .modal > .actions {
     @apply px-[10px] py-[5px] m-auto text-center;
@@ -16,20 +16,25 @@
   .modal > .close {
     @apply cursor-pointer absolute block py-[2px] px-[5px] leading-5 -right-2 -top-2 text-2xl bg-white rounded-2xl border border-solid;
   }
-  table.schedules,
-  table.schedules th,
-  table.schedules tr,
-  table.schedules td {
-    @apply border-0  p-0;
+  
+  form input {
+    @apply border border-black rounded-md;
   }
-  table.schedules th {
-    @apply p-1 border-x;
+
+  .submitButton {
+    @apply bg-blue-500 text-white text-xl rounded-lg mx-auto px-3 py-1 mt-3 flex;
   }
-  table.schedules tr {
-    @apply border h-8;
+
+  button.multipleOptions {
+    @apply rounded-md border bg-gray-100 mx-1 px-1;
   }
-  table.schedules tr:hover td {
-    @apply bg-gray-300 cursor-pointer;
+
+  button.selectedOption {
+    @apply bg-gray-300;
+  }
+
+  label, input, select {
+    @apply mt-2;
   }
 }
 
