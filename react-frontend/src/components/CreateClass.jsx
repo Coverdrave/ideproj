@@ -4,7 +4,7 @@ import "./CreateClass.css";
 import "reactjs-popup/dist/index.css";
 import { useEffect, useState } from "react";
 
-export default function App({ }) {
+export default function App({close}) {
   const [allSubjects, setAllSubjects] = useState([]);
 
   const [subjectName, setSubjectName] = useState();
@@ -65,93 +65,82 @@ export default function App({ }) {
   }
 
   return (
-    <Popup
-      trigger={
-        <button className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-          {" "}
-          Създай час{" "}
-        </button>
-      }
-      modal
-      nested
-    >
-      {(close) => (
-        <div className="modal">
-          <button className="close" onClick={close}>
-            &times;
-          </button>
-          <div className="header"> Създаване на нов час </div>
-          <div className="content">
-            <form onSubmit={handleSubmit}>
-              <select
-                value={subjectName}
-                defaultValue={-1}
-                onChange={(e) => setSubjectName(e.target.value)}
-                required
-              >
-                <option disabled value={-1}>Предмет</option>
-                {allSubjects.map((subject, index) => (
-                  <option value={subject.name}>{subject.name}</option>
-                ))}
-              </select>
-              <br/>
+    <Popup open={true} closeOnDocumentClick onClose={close}>
+      <div className="modal">
+        <a className="close" onClick={close}>
+          &times;
+        </a>
+        <div className="header"> Създаване на нов час </div>
+        <div className="content">
+          <form onSubmit={handleSubmit}>
+            <select
+              value={subjectName}
+              defaultValue={-1}
+              onChange={(e) => setSubjectName(e.target.value)}
+              required
+            >
+              <option disabled value={-1}>Предмет</option>
+              {allSubjects.map((subject, index) => (
+                <option value={subject.name}>{subject.name}</option>
+              ))}
+            </select>
+            <br/>
 
-              <select
-                value={startHour}
-                defaultValue={-1}
-                onChange={(e) => setStartHour(e.target.value)}
-                required
-              >
-                <option disabled value={-1}>Начален час</option>
-                {[...Array(maxHour - minHour + 1)].map((val, hour) => (
-                  <option value={minHour + hour}>{minHour + hour}ч.</option>
-                ))}
-              </select>
-              <br/>
+            <select
+              value={startHour}
+              defaultValue={-1}
+              onChange={(e) => setStartHour(e.target.value)}
+              required
+            >
+              <option disabled value={-1}>Начален час</option>
+              {[...Array(maxHour - minHour + 1)].map((val, hour) => (
+                <option value={minHour + hour}>{minHour + hour}ч.</option>
+              ))}
+            </select>
+            <br/>
 
-              <label>
-                Продължителност:
-                {[...Array(4)].map((val, hour) => (
-                  <button
-                    type="button"
-                    className={duration && duration == hour+1 ? 'multipleOptions selectedOption' : 'multipleOptions'}
-                    onClick={() => setDuration(hour+1)}
-                    value={hour+1}
-                  >
-                    {hour+1} час{hour+1 != 1 ? 'a' : ""}
-                  </button>
-                ))}
-              </label>
-              <br/>
+            <label>
+              Продължителност:
+              {[...Array(4)].map((val, hour) => (
+                <button
+                  type="button"
+                  className={duration && duration == hour+1 ? 'multipleOptions selectedOption' : 'multipleOptions'}
+                  onClick={() => setDuration(hour+1)}
+                  value={hour+1}
+                >
+                  {hour+1} час{hour+1 != 1 ? 'a' : ""}
+                </button>
+              ))}
+            </label>
+            <br/>
 
-              <input
-                value={room} 
-                onChange={(e) => setRoom(e.target.value)} 
-                placeholder="Стая"
-                required
-                size={6}
+            <input
+              value={room} 
+              onChange={(e) => setRoom(e.target.value)} 
+              placeholder="Стая"
+              required
+              size={6}
+            />
+            <br/>
+
+            <label>
+              Упражнение:
+              <input 
+                type="checkbox" 
+                value={isExercise}
+                onChange={e => setIsExercise(e.target.checked)}
+                defaultChecked={false}
               />
-              <br/>
-
-              <label>
-                Упражнение:
-                <input 
-                  type="checkbox" 
-                  value={isExercise}
-                  onChange={e => setIsExercise(e.target.checked)}
-                  defaultChecked={false}
-                />
-              </label>
-              <br/>
-              
-              {message && <p>{message}</p>}
-
-              <button className="submitButton" type="submit">Създай</button>
-            </form>
+            </label>
+            <br/>
             
-          </div>
+            {message && <p>{message}</p>}
+
+            <button className="submitButton" type="submit">Създай</button>
+          </form>
+          
         </div>
-      )}
+      </div>
     </Popup>
   );
 }

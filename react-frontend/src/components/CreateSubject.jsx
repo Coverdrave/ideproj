@@ -4,7 +4,7 @@ import "./CreateSubject.css";
 import "reactjs-popup/dist/index.css";
 import { useEffect, useState } from "react";
 
-export default function App({ }) {
+export default function App({close}) {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
 
@@ -35,39 +35,27 @@ export default function App({ }) {
   }
 
   return (
-    <Popup
-      trigger={
-        <button className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-          {" "}
-          Създай предмет{" "}
-        </button>
-      }
-      modal
-      nested
-    >
-      {(close) => (
-        <div className="modal">
-          <button className="close" onClick={close}>
-            &times;
-          </button>
-          <div className="header"> Създаване на нов предмет </div>
-          <div className="content">
-            <form onSubmit={handleSubmit}>
-              <input
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder="Име на предмета"
-                required
-              />
-              <br/>
-              {message && <p>{message}</p>}
+    <Popup open={true} closeOnDocumentClick onClose={close}>
+      <div className="modal">
+        <a className="close" onClick={close}>
+          &times;
+        </a>
+        <div className="header"> Създаване на нов предмет </div>
+        <div className="content">
+          <form onSubmit={handleSubmit}>
+            <input
+              value={name} 
+              onChange={(e) => setName(e.target.value)} 
+              placeholder="Име на предмета"
+              required
+            />
+            <br/>
+            {message && <p>{message}</p>}
 
-              <button className="submitButton" type="submit">Създай</button>
-            </form>
-            
-          </div>
+            <button className="submitButton" type="submit">Създай</button>
+          </form>
         </div>
-      )}
+      </div>
     </Popup>
   );
 }

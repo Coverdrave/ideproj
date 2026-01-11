@@ -1,13 +1,13 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import "./App.css";
+import "reactjs-popup/dist/index.css";
 import SchedulesTable from "./components/SchedulesTable";
-import CreateSubject from "./components/CreateSubject";
-import CreateClass from "./components/CreateClass";
-import CreateSchedule from "./components/CreateSchedule";
-import ChangeScheduleModal from "./components/ChangeScheduleModal";
-import AssignClass from "./components/AssignClass";
-// import { jsPDF } from "jspdf";
-// import html2canvas from "html2canvas";
+
+const CreateSchedule = lazy(() => import('./components/CreateSchedule'));
+const CreateSubject = lazy(() => import('./components/CreateSubject'));
+const CreateClass = lazy(() => import('./components/CreateClass.jsx'));
+const AssignClass = lazy(() => import('./components/AssignClass.jsx'));
+const ChangeScheduleModal = lazy(() => import('./components/ChangeScheduleModal.jsx'));
 
 export default function App() {
   const [apiData, setApiData] = useState([]);
@@ -15,6 +15,10 @@ export default function App() {
   const [year, setYear] = useState("2024");
   const [courseYear, setCourseYear] = useState("3");
   const [isWinterTerm, setIsWinterTerm] = useState(true);
+
+  const [openModal, setOpenModal] = useState(null);
+  const open = (modalName) => setOpenModal(modalName);
+  const close = () => setOpenModal(null);
 
   async function getApiData() {
     const res = await fetch(
@@ -40,9 +44,9 @@ export default function App() {
     setIsWinterTerm(isWinterTerm == 1 ? true : false);
   }
 
-  useEffect(() => {
-    getApiData();
-  }, []);
+  // useEffect(() => {
+  //   getApiData();
+  // }, []);
 
   useEffect(() => {
     getApiData();
@@ -55,10 +59,30 @@ export default function App() {
           <h1 className="max-w-fit mx-auto">Учебен разпис</h1>
 
           <div className="absolute top-0 left-0 flex gap-3">
-            <CreateSchedule/>
-            <CreateClass/>
-            <CreateSubject/>
-            <AssignClass/>
+            {apiData && apiData.schedules ? (
+            <>
+              <button type="button" onClick={() => open("createSchedule")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+                Създай график
+              </button>
+              <button type="button" onClick={() => open("createClass")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+                Създай час
+              </button>
+              <button type="button" onClick={() => open("createSubject")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+                Създай предмет
+              </button>
+              <button type="button" onClick={() => open("assignClass")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+                Добави час
+              </button>
+
+              <Suspense>
+                {openModal === "createSchedule" && <CreateSchedule close={close} />}
+                {openModal === "createClass" && <CreateClass close={close} />}
+                {openModal === "createSubject" && <CreateSubject close={close} />}
+                {openModal === "assignClass" && <AssignClass close={close} />}
+              </Suspense>
+            </>
+            ) : <></>
+            }
           </div>
           <div className="absolute top-0 right-0">
             <ChangeScheduleModal updateData={updateData} />

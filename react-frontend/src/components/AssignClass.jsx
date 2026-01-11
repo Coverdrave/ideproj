@@ -4,7 +4,7 @@ import "./AssignClass.css";
 import "reactjs-popup/dist/index.css";
 import { useEffect, useState } from "react";
 
-export default function App({  }) {
+export default function App({close}) {
   const [allSchedules, setAllSchedules] = useState([]);
   const [selectedSchedule, setSelectedSchedule] = useState();
 
@@ -143,150 +143,139 @@ export default function App({  }) {
   }, [selectedSchedule, subgroup, day, isOddWeek]);
 
   return (
-    <Popup
-      trigger={
-        <button className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-          {" "}
-          Добави час{" "}
-        </button>
-      }
-      modal
-      nested
-    >
-      {(close) => (
-        <div className="modal">
-          <button className="close" onClick={close}>
-            &times;
-          </button>
-          <div className="header"> Добавяне на час към програма </div>
-          <div className="content">
-            {allSchedules ? (
-              <>
-                <table className="schedules">
-                  <thead>
-                    <tr>
-                      <th>Група</th>
-                      <th>Година</th>
-                      <th>Курс</th>
-                      <th>Семестър</th>
+    <Popup open={true} closeOnDocumentClick onClose={close}>
+      <div className="modal">
+        <a className="close" onClick={close}>
+          &times;
+        </a>
+        <div className="header"> Добавяне на час към програма </div>
+        <div className="content">
+          {allSchedules ? (
+            <>
+              <table className="schedules">
+                <thead>
+                  <tr>
+                    <th>Група</th>
+                    <th>Година</th>
+                    <th>Курс</th>
+                    <th>Семестър</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {allSchedules.map((schedule, index) => (
+                    <tr
+                      onClick={() => {
+                        setGroup(schedule.group);
+                        setCourseYear(schedule.courseYear);
+                        setYear(schedule.year);
+                        setIsWinterTerm(schedule.isWinterTerm);
+
+                        setSelectedSchedule(index);
+                      }}
+                      className={selectedSchedule == index ? 'selected' : ''}
+                    >
+                      <td>{schedule.group}</td>
+                      <td>{schedule.year}</td>
+                      <td>{schedule.courseYear}</td>
+                      <td>{schedule.isWinterTerm ? "Зимен" : "Летен"}</td>
                     </tr>
-                  </thead>
+                  ))}
+                </tbody>
+              </table>
 
-                  <tbody>
-                    {allSchedules.map((schedule, index) => (
-                      <tr
-                        onClick={() => {
-                          setGroup(schedule.group);
-                          setCourseYear(schedule.courseYear);
-                          setYear(schedule.year);
-                          setIsWinterTerm(schedule.isWinterTerm);
+              <form onSubmit={handleSubmit}>
+                <div className="selectable">
+                  Подгрупа:
+                  {subgroupOptions.map((opt, _) => (
+                    <button 
+                      type="button"
+                      className={subgroup && subgroup == opt.val ? 'multipleOptions selectedOption' : 'multipleOptions'}
+                      onClick={() => setSubgroup(opt.val)}
+                      value={opt.val}
+                    >
+                      {opt.key}
+                    </button>
+                  ))}
+                </div>
 
-                          setSelectedSchedule(index);
-                        }}
-                        className={selectedSchedule == index ? 'selected' : ''}
-                      >
-                        <td>{schedule.group}</td>
-                        <td>{schedule.year}</td>
-                        <td>{schedule.courseYear}</td>
-                        <td>{schedule.isWinterTerm ? "Зимен" : "Летен"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div className="selectable">
+                  Седмица:
+                  {weekOptions.map((opt, _) => (
+                    <button 
+                      type="button"
+                      className={isOddWeek && isOddWeek == opt.val ? 'multipleOptions selectedOption' : 'multipleOptions'}
+                      onClick={() => setIsOddWeek(opt.val)}
+                      value={opt.val}
+                    >
+                      {opt.key}
+                    </button>
+                  ))}
+                </div>
 
-                <form onSubmit={handleSubmit}>
-                  <div className="selectable">
-                    Подгрупа:
-                    {subgroupOptions.map((opt, _) => (
-                      <button 
-                        type="button"
-                        className={subgroup && subgroup == opt.val ? 'multipleOptions selectedOption' : 'multipleOptions'}
-                        onClick={() => setSubgroup(opt.val)}
-                        value={opt.val}
-                      >
-                        {opt.key}
-                      </button>
-                    ))}
-                  </div>
+                <div className="selectable">
+                  Ден:
+                  {dayOptions.map((opt, _) => (
+                    <button 
+                      type="button"
+                      className={day && day == opt.val ? 'multipleOptions selectedOption' : 'multipleOptions'}
+                      onClick={() => setDay(opt.val)}
+                      value={opt.val}
+                    >
+                      {opt.key}
+                    </button>
+                  ))}
+                </div>
 
-                  <div className="selectable">
-                    Седмица:
-                    {weekOptions.map((opt, _) => (
-                      <button 
-                        type="button"
-                        className={isOddWeek && isOddWeek == opt.val ? 'multipleOptions selectedOption' : 'multipleOptions'}
-                        onClick={() => setIsOddWeek(opt.val)}
-                        value={opt.val}
-                      >
-                        {opt.key}
-                      </button>
-                    ))}
-                  </div>
+                {compatibleClasses ? (
+                  <>
+                    <table className="schedules mt-2">
+                      <thead>
+                        <tr>
+                          <th>Предмет</th>
+                          <th>Продължителност</th>
+                          <th>Стая</th>
+                          <th>Вид</th>
+                        </tr>
+                      </thead>
 
-                  <div className="selectable">
-                    Ден:
-                    {dayOptions.map((opt, _) => (
-                      <button 
-                        type="button"
-                        className={day && day == opt.val ? 'multipleOptions selectedOption' : 'multipleOptions'}
-                        onClick={() => setDay(opt.val)}
-                        value={opt.val}
-                      >
-                        {opt.key}
-                      </button>
-                    ))}
-                  </div>
-
-                  {compatibleClasses ? (
-                    <>
-                      <table className="schedules mt-2">
-                        <thead>
-                          <tr>
-                            <th>Предмет</th>
-                            <th>Продължителност</th>
-                            <th>Стая</th>
-                            <th>Вид</th>
+                      <tbody className="text-left">
+                        {compatibleClasses.map((uniClass, index) => (
+                          <tr
+                            onClick={() => {
+                              setClassId(uniClass.id);
+                            }}
+                            className={classId == uniClass.id ? 'selected' : ''}
+                          >
+                            <td>{subjects[uniClass.subject_id-1].name}</td>
+                            <td>{uniClass.startHour}:00 - {uniClass.startHour+uniClass.duration-1}:45</td>
+                            <td>{uniClass.room}</td>
+                            <td>{(uniClass.isExercise == 0) ? "Лекция" : "Упражнение"}</td>
                           </tr>
-                        </thead>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                ) : (compatibleClasses == [] ? 
+                    <p className="text-center text-3xl mt-2">Няма съвместими часове</p> 
+                  : showLoading ? 
+                    <div className="loader mx-auto mt-4"></div> 
+                  : "")}
 
-                        <tbody className="text-left">
-                          {compatibleClasses.map((uniClass, index) => (
-                            <tr
-                              onClick={() => {
-                                setClassId(uniClass.id);
-                              }}
-                              className={classId == uniClass.id ? 'selected' : ''}
-                            >
-                              <td>{subjects[uniClass.subject_id-1].name}</td>
-                              <td>{uniClass.startHour}:00 - {uniClass.startHour+uniClass.duration-1}:45</td>
-                              <td>{uniClass.room}</td>
-                              <td>{(uniClass.isExercise == 0) ? "Лекция" : "Упражнение"}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </>
-                  ) : (compatibleClasses == [] ? 
-                      <p className="text-center text-3xl mt-2">Няма съвместими часове</p> 
-                    : showLoading ? 
-                      <div className="loader mx-auto mt-4"></div> 
-                    : "")}
+                
 
-                  
+                {message && <p className="text-center text-3xl mt-2">{message}</p>}
 
-                  {message && <p className="text-center text-3xl mt-2">{message}</p>}
-
-                  {classId ? (
-                    <button className="submitButton" type="submit">Добави</button>
-                  ) : ""}
-                </form>
-            </>
-            ) : (
-              "Не са намерени групи"
-            )}
-          </div>
+                {classId ? (
+                  <button className="submitButton" type="submit">Добави</button>
+                ) : ""}
+              </form>
+          </>
+          ) : (
+            "Не са намерени групи"
+          )}
         </div>
-      )}
+      </div>
     </Popup>
   );
 }
