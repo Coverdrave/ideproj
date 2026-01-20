@@ -14,20 +14,23 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-            $table->string('group');
-            $table->string('subgroup');
-            // $table->enum('subgroup', ['A', 'B']);
-            $table->integer('day');
-            // $table->enum('day', ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']);
-            $table->boolean('isOddWeek');
-            // $table->enum('week', ['odd', 'even']);
-            $table->boolean('isWinterTerm');
-            // $table->enum('term', ['winter', 'summer']);
-            $table->year('year');
-            $table->integer('courseYear');
+
+            $table->foreignId('student_group_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->year('academic_year');
+            $table->boolean('is_winter_term');
+
             $table->timestamps();
 
-            // $table->foreignIdFor(UniClass::class)->constrained();
+            $table->unique([
+                'student_group_id',
+                'academic_year',
+                'is_winter_term'
+            ]);
+
+            $table->index('student_group_id');
         });
     }
 

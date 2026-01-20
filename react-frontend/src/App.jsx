@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import "./App.css";
 import "reactjs-popup/dist/index.css";
-import SchedulesTable from "./components/SchedulesTable";
+import ScheduleGrid from "./components/ScheduleGrid.jsx";
 
 const CreateSchedule = lazy(() => import('./components/CreateSchedule'));
 const CreateSubject = lazy(() => import('./components/CreateSubject'));
@@ -11,9 +11,10 @@ const ChangeScheduleModal = lazy(() => import('./components/ChangeScheduleModal.
 
 export default function App() {
   const [apiData, setApiData] = useState([]);
-  const [group, setGroup] = useState("25");
-  const [year, setYear] = useState("2024");
-  const [courseYear, setCourseYear] = useState("3");
+
+  const [groupNumber, setGroupNumber] = useState("27");
+  const [startYear, setStartYear] = useState("2022");
+  const [academicYear, setAcademicYear] = useState("2025");
   const [isWinterTerm, setIsWinterTerm] = useState(true);
 
   const [openModal, setOpenModal] = useState(null);
@@ -24,12 +25,13 @@ export default function App() {
     const res = await fetch(
       "/api/schedule?" +
         new URLSearchParams({
-          group: group,
-          year: year,
-          courseYear: courseYear,
-          isWinterTerm: isWinterTerm == true ? 1 : 0,
+          group_number: groupNumber,
+          start_year: startYear,
+          academic_year: academicYear,
+          is_winter_term: isWinterTerm ? 1 : 0,
         }).toString()
     );
+    
     const data = await res.json();
 
     if (res.ok) {
@@ -37,60 +39,59 @@ export default function App() {
     }
   }
 
-  function updateData(group, year, courseYear, isWinterTerm) {
-    setGroup(group);
-    setYear(year);
-    setCourseYear(courseYear);
+  function updateData(groupNumber, startYear, academicYear, isWinterTerm) {
+    setGroupNumber(groupNumber);
+    setStartYear(startYear);
+    setAcademicYear(academicYear);
     setIsWinterTerm(isWinterTerm == 1 ? true : false);
   }
 
-  // useEffect(() => {
-  //   getApiData();
-  // }, []);
+  useEffect(() => {
+    getApiData();
+  }, []);
 
   useEffect(() => {
     getApiData();
-  }, [group, year, courseYear, isWinterTerm]);
+  }, [groupNumber, startYear, academicYear, isWinterTerm]);
 
   return (
     <>
-      <div className="max-w-max min-w-max mx-auto mb-40">
-        <div className="relative text-center mt-5 mb-5">
-          <h1 className="max-w-fit mx-auto">Учебен разпис</h1>
+      <div className="mx-5 mb-40">
+        <div className="mt-5 mb-5 grid grid-flow-col justify-around gap-64">
+          <div className="flex gap-3">
+            <button type="button" onClick={() => open("createSchedule")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Създай график
+            </button>
+            <button type="button" onClick={() => open("createClass")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Създай час
+            </button>
+            <button type="button" onClick={() => open("createSubject")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Създай предмет
+            </button>
+            <button type="button" onClick={() => open("assignClass")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Добави час
+            </button>
 
-          <div className="absolute top-0 left-0 flex gap-3">
-            {apiData && apiData.schedules ? (
-            <>
-              <button type="button" onClick={() => open("createSchedule")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-                Създай график
-              </button>
-              <button type="button" onClick={() => open("createClass")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-                Създай час
-              </button>
-              <button type="button" onClick={() => open("createSubject")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-                Създай предмет
-              </button>
-              <button type="button" onClick={() => open("assignClass")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-                Добави час
-              </button>
-
-              <Suspense>
-                {openModal === "createSchedule" && <CreateSchedule close={close} />}
-                {openModal === "createClass" && <CreateClass close={close} />}
-                {openModal === "createSubject" && <CreateSubject close={close} />}
-                {openModal === "assignClass" && <AssignClass close={close} />}
-              </Suspense>
-            </>
-            ) : <></>
-            }
+            <Suspense>
+              {openModal === "createSchedule" && <CreateSchedule close={close} />}
+              {openModal === "createClass" && <CreateClass close={close} />}
+              {openModal === "createSubject" && <CreateSubject close={close} />}
+              {openModal === "assignClass" && <AssignClass close={close} />}
+              {openModal === "changeScheduleModal" && <ChangeScheduleModal updateData={updateData} close={close} />}
+            </Suspense>
           </div>
-          <div className="absolute top-0 right-0">
-            <ChangeScheduleModal updateData={updateData} />
+          <div>
+            <button type="button" onClick={() => open("changeScheduleModal")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Програма
+            </button>
           </div>
         </div>
 
-        {apiData && apiData.schedules ? (
-          <SchedulesTable apiData={apiData} />
+        {apiData && apiData.groupInfo ? (
+          // <SchedulesTable apiData={apiData} />
+          <div className="max-w-min min-w-max mx-auto">
+            <ScheduleGrid apiData={apiData} />
+          </div>
         ) : (
           apiData.error && (
             <p className="font-extrabold text-6xl text-center my-[30vh]">

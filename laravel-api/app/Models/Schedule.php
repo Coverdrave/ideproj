@@ -2,33 +2,31 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Schedule extends Model
 {
-    use HasFactory;
-
-    // protected $primaryKey = 'group';
-    // public $incrementing = false;
-    // protected $keyType = 'string';
-
     protected $fillable = [
-        'group',
-        'subgroup',
-        'day',
-        'isOddWeek',
-        'isWinterTerm',
-        'year',
-        'courseYear',
+        'student_group_id',
+        'academic_year',
+        'is_winter_term'
     ];
 
-    // public function classes() : HasMany {
-    //     return $this->hasMany(UniClass::class);
-    // }
-    public function classes() : BelongsToMany {
-        return $this->BelongsToMany(UniClass::class, 'schedules_classes', 'schedule_id', 'uni_class_id');
+    protected $casts = [
+        'is_winter_term' => 'boolean',
+    ];
+
+    public function studentGroup()
+    {
+        return $this->belongsTo(StudentGroup::class);
+    }
+
+    public function uniClasses()
+    {
+        return $this->belongsToMany(
+            UniClass::class,
+            'schedule_uni_class'
+        )->withTimestamps();
     }
 }
+

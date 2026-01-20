@@ -2,30 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class UniClass extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        // 'subject_id',
-        // 'schedule_id',
-        'startHour',
+        'subject_id',
+        'start_hour',
         'duration',
-        'room',
-        'isExercise',
+        'day',
+        'week',
+        'is_exercise',
+        'room'
     ];
 
-    public function subject() : BelongsTo {
+    protected $casts = [
+        'is_exercise' => 'boolean',
+    ];
+
+    public function subject()
+    {
         return $this->belongsTo(Subject::class);
     }
 
-    public function schedules() : BelongsToMany {
-        return $this->belongsToMany(Schedule::class, 'schedules_classes', 'uni_class_id', 'schedule_id');
+    public function schedules()
+    {
+        return $this->belongsToMany(
+            Schedule::class,
+            'schedule_uni_class'
+        )->withTimestamps();
     }
 }
+

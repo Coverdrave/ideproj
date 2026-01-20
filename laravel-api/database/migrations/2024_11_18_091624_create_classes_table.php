@@ -15,17 +15,39 @@ return new class extends Migration
     {
         Schema::create('uni_classes', function (Blueprint $table) {
             $table->id();
-            // $table->foreignId('subject_id');
-            // $table->foreignId('schedule_id');
-            // $table->integer('day');
-            $table->integer('startHour');
-            $table->integer('duration')->default(2);
+
+            $table->foreignId('subject_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->tinyInteger('start_hour'); // 0–23
+            $table->tinyInteger('duration');   // >=1
+            $table->tinyInteger('day');        // 1–7
+
+            $table->enum('week', ['odd', 'even', 'every']);
+            //do week checks on insert, if new class is on even week, but there is class at that time
+            //which is every week dont allow, but if there is on odd week, allow
+
+            $table->boolean('is_exercise');
             $table->string('room');
-            $table->boolean('isExercise');
+
             $table->timestamps();
 
-            $table->foreignIdFor(Subject::class)->constrained();
-            // $table->foreignIdFor(Schedule::class)->constrained();
+            // Same subject cannot overlap itself
+            $table->unique([
+                'subject_id',
+                'start_hour',
+                'day',
+                'week'
+            ]);
+
+            // Same room cannot be double-booked
+            $table->unique([
+                'room',
+                'start_hour',
+                'day',
+                'week'
+            ]);
         });
     }
 

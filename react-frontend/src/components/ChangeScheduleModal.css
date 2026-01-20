@@ -2,13 +2,13 @@
 
 @layer components {
   .modal {
-    @apply text-lg w-min p-1;
+    @apply text-lg p-1;
   }
   .modal > .header {
-    @apply w-min mx-auto border-b border-solid border-gray-500 text-2xl text-center whitespace-nowrap;
+    @apply mx-auto border-b border-solid border-gray-500 text-2xl text-center whitespace-nowrap;
   }
   .modal > .content {
-    @apply w-min mx-auto mt-6;
+    @apply pt-2;
   }
   .modal > .actions {
     @apply px-[10px] py-[5px] m-auto text-center;

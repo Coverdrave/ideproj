@@ -5,11 +5,7 @@ namespace Database\Seeders;
 use App\Models\Schedule;
 use App\Models\Subject;
 use App\Models\UniClass;
-use App\Models\User;
-use DateTime;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Date;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,902 +21,404 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        Subject::create([
-            'name' => 'Микропроцесорни технологии'
-        ]);
-        Subject::create([
-            'name' => 'Системно програмиране'
-        ]);
-        Subject::create([
-            'name' => 'Софтуерно инженерство'
-        ]);
-        Subject::create([
-            'name' => 'Интегрирани среди'
-        ]);
-        Subject::create([
-            'name' => 'Компютърна периферия'
-        ]);
-        Subject::create([
-            'name' => 'Дискретни структури и моделиране'
-        ]);
+        $subjects = collect([
+            ['name' => 'Информационни системи', 'shortened_name' => 'Инф. с-ми'],
+            ['name' => 'Езикови процесори', 'shortened_name' => 'Език. процесори'],
+            ['name' => 'Компютърни мрежи', 'shortened_name' => 'Комп. мрежи'],
+            ['name' => 'Операционни системи', 'shortened_name' => 'Операц. с-ми'],
+            ['name' => 'Уеб програмиране', 'shortened_name' => 'Уеб прогр.'],
+            ['name' => 'Мултимедиини системи и технологии', 'shortened_name' => 'Мултисист. и техн.'],
+        ])->mapWithKeys(function ($data) {
+            return [
+                $data['name'] => Subject::firstOrCreate($data)
+            ];
+        });
 
+        $groups = collect([
+            ['group_number' => 27, 'subgroup' => 'А', 'start_year' => 2022],
+            ['group_number' => 27, 'subgroup' => 'Б', 'start_year' => 2022],
+            ['group_number' => 26, 'subgroup' => 'А', 'start_year' => 2022],
+            ['group_number' => 26, 'subgroup' => 'Б', 'start_year' => 2022],
+        ])->mapWithKeys(function ($data) {
+            return [
+                "{$data['group_number']}{$data['subgroup']}" =>
+                    \App\Models\StudentGroup::firstOrCreate($data)
+            ];
+        });
 
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'A',
-            'day' => 0,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2.209',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '1.317',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.208',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.206',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-        ]);
+        function makeSchedule($group, $year, $isWinter)
+        {
+            return Schedule::firstOrCreate([
+                'student_group_id' => $group->id,
+                'academic_year' => $year,
+                'is_winter_term' => $isWinter,
+            ]);
+        }
 
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'A',
-            'day' => 0,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2.209',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '1.317',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.208',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.206',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-        ]);
+        function classSlot(
+            $subjectId,
+            $day,
+            $start,
+            $room,
+            $week,
+            $isExercise,
+            $duration = 2
+        ) {
+            return UniClass::firstOrCreate([
+                'subject_id' => $subjectId,
+                'day' => $day,
+                'start_hour' => $start,
+                'week' => $week,
+                'room' => $room,
+            ], [
+                'duration' => $duration,
+                'is_exercise' => $isExercise,
+            ]);
+        }
 
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'B',
-            'day' => 0,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2.209',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '1.317',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.206',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-        ]);
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'B',
-            'day' => 0,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2.209',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '1.317',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.206',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-        ]);
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'A',
-            'day' => 1,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.207',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-        ]);
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'A',
-            'day' => 1,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.207',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-        ]);
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'B',
-            'day' => 1,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '6.207',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.208',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-        ]);
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'B',
-            'day' => 1,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '6.207',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.208',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-        ]);
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'A',
-            'day' => 2,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'A',
-            'day' => 2,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.306',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-        ]);
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'B',
-            'day' => 2,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '7.106',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.201',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'B',
-            'day' => 2,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '7.106',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.201',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'A',
-            'day' => 3,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '7.106',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '6.201',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'A',
-            'day' => 3,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '7.106',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '6.201',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-
-
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'B',
-            'day' => 3,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ]);
-        Schedule::create([
-            'group' => '25',
-            'subgroup' => 'B',
-            'day' => 3,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.306',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-        ]);
-
-
-
-
-
-
-
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'A',
-            'day' => 0,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2.209',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '1.317',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'A',
-            'day' => 0,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2.209',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.306',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '1.317',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'B',
-            'day' => 0,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2.209',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.306',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '1.317',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.208',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'B',
-            'day' => 0,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2.209',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '1.317',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.208',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-        ]);
-
-
-
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'A',
-            'day' => 1,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '6.208',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.201',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'A',
-            'day' => 1,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '6.208',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.201',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'B',
-            'day' => 1,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 16,
-                'room' => '6.201',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'B',
-            'day' => 1,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Системно програмиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 16,
-                'room' => '6.201',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Компютърна периферия')->first()->id,
-            ])->id,
-        ]);
-
-
-
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'A',
-            'day' => 2,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '6.206',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'A',
-            'day' => 2,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '6.206',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'B',
-            'day' => 2,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 8,
-                'room' => '2Г.105',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Интегрирани среди')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.206',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-        ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'B',
-            'day' => 2,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '2.203',
-                'isExercise' => false,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '6.206',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Микропроцесорни технологии')->first()->id,
-            ])->id,
-        ]);
-
-
+        $schedule27A = makeSchedule($groups['27А'], 2025, true);
+        $schedule27B = makeSchedule($groups['27Б'], 2025, true);
+        $schedule26A = makeSchedule($groups['26А'], 2025, true);
+        $schedule26B = makeSchedule($groups['26Б'], 2025, true);
         
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'A',
-            'day' => 3,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '7.106',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '6.207',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
+        $schedule27A->uniClasses()->syncWithoutDetaching([
+            classSlot(
+                $subjects['Информационни системи']->id,
+                1, // Monday
+                10,
+                '2.209',
+                'even',
+                false
+            )->id,
+            classSlot(
+                $subjects['Езикови процесори']->id,
+                1,
+                12,
+                '1.317',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Компютърни мрежи']->id,
+                1,
+                14,
+                '1.307',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Операционни системи']->id,
+                2,
+                8,
+                '2Б.107',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Компютърни мрежи']->id,
+                2,
+                10,
+                '2Г.302',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Уеб програмиране']->id,
+                2,
+                14,
+                '2.209',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Езикови процесори']->id,
+                2,
+                16,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Операционни системи']->id,
+                3,
+                8,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Мултимедиини системи и технологии']->id,
+                3,
+                10,
+                '2.209',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Мултимедиини системи и технологии']->id,
+                3,
+                14,
+                '6.306',
+                'even',
+                true
+            )->id,
+            classSlot(
+                $subjects['Информационни системи']->id,
+                4,
+                8,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Уеб програмиране']->id,
+                4,
+                12,
+                '6.207',
+                'every',
+                true
+            )->id,
         ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'A',
-            'day' => 3,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '7.106',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 12,
-                'room' => '6.207',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
+
+        $schedule27B->uniClasses()->syncWithoutDetaching([
+            classSlot(
+                $subjects['Езикови процесори']->id,
+                1,
+                12,
+                '1.317',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Компютърни мрежи']->id,
+                1,
+                14,
+                '1.307',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Операционни системи']->id,
+                2,
+                8,
+                '2Б.107',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Уеб програмиране']->id,
+                2,
+                14,
+                '2.209',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Мултимедиини системи и технологии']->id,
+                3,
+                10,
+                '2.209',
+                'every',
+                false
+            )->id,
         ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'B',
-            'day' => 3,
-            'isOddWeek' => true,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.207',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '7.106',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
+
+        $schedule26A->uniClasses()->syncWithoutDetaching([
+            classSlot(
+                $subjects['Информационни системи']->id,
+                1, // Monday
+                10,
+                '2.209',
+                'even',
+                false
+            )->id,
+            classSlot(
+                $subjects['Езикови процесори']->id,
+                1,
+                12,
+                '1.317',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Компютърни мрежи']->id,
+                1,
+                14,
+                '1.307',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Операционни системи']->id,
+                2,
+                8,
+                '2Б.107',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Езикови процесори']->id,
+                2,
+                10,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Компютърни мрежи']->id,
+                2,
+                12,
+                '2Г.302',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Уеб програмиране']->id,
+                2,
+                14,
+                '2.209',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Мултимедиини системи и технологии']->id,
+                3,
+                10,
+                '2.209',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Уеб програмиране']->id,
+                3,
+                12,
+                '6.207',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Информационни системи']->id,
+                3,
+                14,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Операционни системи']->id,
+                4,
+                10,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Мултимедиини системи и технологии']->id,
+                4,
+                12,
+                '6.208',
+                'even',
+                true
+            )->id,
         ]);
-        Schedule::create([
-            'group' => '26',
-            'subgroup' => 'B',
-            'day' => 3,
-            'isOddWeek' => false,
-            'isWinterTerm' => true,
-            'year' => '2024',
-            'courseYear' => 3
-        ])->classes()->attach([
-            UniClass::firstOrCreate([
-                'startHour' => 10,
-                'room' => '6.207',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Дискретни структури и моделиране')->first()->id,
-            ])->id,
-            UniClass::firstOrCreate([
-                'startHour' => 14,
-                'room' => '7.106',
-                'isExercise' => true,
-                'subject_id' => Subject::where('name', 'Софтуерно инженерство')->first()->id,
-            ])->id,
+
+        $schedule26B->uniClasses()->syncWithoutDetaching([
+            classSlot(
+                $subjects['Информационни системи']->id,
+                1, // Monday
+                10,
+                '2.209',
+                'even',
+                false
+            )->id,
+            classSlot(
+                $subjects['Езикови процесори']->id,
+                1,
+                12,
+                '1.317',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Компютърни мрежи']->id,
+                1,
+                14,
+                '1.307',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Операционни системи']->id,
+                2,
+                8,
+                '2Б.107',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Мултимедиини системи и технологии']->id,
+                2,
+                10,
+                '6.301',
+                'even',
+                true
+            )->id,
+            classSlot(
+                $subjects['Езикови процесори']->id,
+                2,
+                12,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Уеб програмиране']->id,
+                2,
+                14,
+                '2.209',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Мултимедиини системи и технологии']->id,
+                3,
+                10,
+                '2.209',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Информационни системи']->id,
+                3,
+                12,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Уеб програмиране']->id,
+                3,
+                14,
+                '6.207',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Операционни системи']->id,
+                4,
+                12,
+                '6.401',
+                'every',
+                true
+            )->id,
+            classSlot(
+                $subjects['Компютърни мрежи']->id,
+                4,
+                14,
+                '2Г.302',
+                'every',
+                true
+            )->id,
         ]);
-        
     }
 }
