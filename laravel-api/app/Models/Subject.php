@@ -8,6 +8,7 @@ class Subject extends Model
 {
     protected $fillable = [
         'name',
+        'shortened_name'
     ];
 
     public function uniClasses()

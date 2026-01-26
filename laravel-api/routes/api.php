@@ -20,6 +20,7 @@ Route::get('/', function () {
 Route::get('/schedule', [ScheduleController::class, 'index']);
 Route::get('/schedule/all', [ScheduleController::class, 'all']);
 Route::post('/schedule/create', [ScheduleController::class, 'create']);
+Route::post('/schedule/generate', [ScheduleController::class, 'generate']);
 
 Route::get('/subject/all', [SubjectController::class, 'all']);
 Route::post('/subject/create', [SubjectController::class, 'create']);
@@ -27,3 +28,4 @@ Route::post('/subject/create', [SubjectController::class, 'create']);
 Route::get('/uni_class/get_compatible_classes', [UniClassController::class, 'get_compatible_classes']);
 Route::post('/uni_class/create', [UniClassController::class, 'create']);
 Route::post('/uni_class/assign_to_schedules', [UniClassController::class, 'assign_to_schedules']);
+

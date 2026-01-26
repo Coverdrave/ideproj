@@ -19,6 +19,7 @@ export default defineConfig({
           "Content-Type": 'application/json',
         }
       }
-    }
+    },
+    allowedHosts: true
   }
 })

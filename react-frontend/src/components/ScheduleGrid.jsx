@@ -66,7 +66,10 @@ export default function ScheduleGrid({ apiData }) {
     let subgroupIndex = subgroupKeys.indexOf(reachedSubgroupKey);
 
     while (subgroupIndex < subgroupKeys.length && subgroupKeys[++subgroupIndex]) {
-      let uniClassBelow = subgroups[subgroupKeys[subgroupIndex]].find((c) => c.id === uniClass.id);
+      let uniClassBelow = subgroups[subgroupKeys[subgroupIndex]]
+        .find((c) => (
+          c.id === uniClass.id && c.startHour === uniClass.startHour && c.isExercise === uniClass.isExercise
+        ));
 
       if (!uniClassBelow || uniClassBelow.week == "even")
         break;
@@ -274,8 +277,9 @@ export default function ScheduleGrid({ apiData }) {
                     if (skipHourExists(skipHours, hour)) {
                       hourReached += skipHourGetDuration(skipHours, hour);
                       skipHourDecrement(skipHours, hour);
-                      if (reachedNeededClass)
+                      if (reachedNeededClass) {
                         uniClass = getNextUniClass(subgroupUniClasses, ++reachedUniClassIndex);
+                      }
                       return;
                     }
                     

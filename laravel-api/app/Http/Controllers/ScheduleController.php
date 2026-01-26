@@ -9,8 +9,16 @@ use App\Models\UniClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use App\CustomFunctions\ConstraintSatisfaction;
+
 class ScheduleController extends Controller
 {
+    private array $weekCmp = [
+        'odd' => 1,
+        'every' => 1,
+        'even' => 2
+    ];
+
     public function index(Request $request) {
         $validated = $request->validate([
             'group_number'  => 'required|integer',
@@ -75,7 +83,7 @@ class ScheduleController extends Controller
                 'startYear'   => $validated['start_year'],
                 'academicYear'=> $validated['academic_year'],
                 'isWinterTerm'=> $validated['is_winter_term'],
-                'subgroups'   => $studentGroups->pluck('subgroup'),
+                'subgroups'   => $subgroups,
             ],
             'orderedClasses' => $rows
         ];
@@ -141,5 +149,142 @@ class ScheduleController extends Controller
     //     return response()->json([
     //         'message' => 'Успешно създаване',
     //     ], 201);
+    }
+
+    public function generate(Request $request) {
+        $variables = [];
+        $domains = [];
+
+        $days = range(1, 5, 1);
+        $hours = range(8, 14, 2);
+        $weeks = [
+            0 => [
+                'odd', 'even'
+            ],
+            1 => [
+                'every'
+            ]
+        ];
+
+        // $constraints = [];
+
+        /*
+        structure
+        subgroups: {},
+        subjects_options: {
+            subjectid: {
+                lecture: {
+                    every_week: true/false,
+                },
+                exercise: {
+                    every_week: true/false,
+                }
+            
+            }
+        }
+        */
+
+        foreach ($request->subgroups as $subgroup) {
+            foreach ($request->subjects_options as $subject_id => $subject) {
+                $variables[] = $var_lect = $subgroup.'_'.$subject_id.'_'.'lecture';
+                $variables[] = $var_exer = $subgroup.'_'.$subject_id.'_'.'exercise';
+
+                $lect_week = $subject["lecture"]["every_week"];
+                $exer_week = $subject["exercise"]["every_week"];
+
+                if ($lect_week == $exer_week) {
+                    foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
+                        $domains[$var_lect][] = [
+                            'day' => $day,
+                            'hour' => $hour,
+                            'week' => $week
+                        ];
+                        $domains[$var_exer][] = [
+                            'day' => $day,
+                            'hour' => $hour,
+                            'week' => $week
+                        ];
+                    }
+                }
+                else {
+                    foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
+                        $domains[$var_lect][] = [
+                            'day' => $day,
+                            'hour' => $hour,
+                            'week' => $week
+                        ];
+                    }
+                    foreach ($this->cartesian_product([$days, $hours, $weeks[$exer_week]]) as [$day, $hour, $week]) {
+                        $domains[$var_exer][] = [
+                            'day' => $day,
+                            'hour' => $hour,
+                            'week' => $week
+                        ];
+                    }
+                }
+            }
+        }
+
+        $csp = new ConstraintSatisfaction($variables, $domains);
+        $b = $csp->backtracking_search();
+
+        return [
+            'groupInfo' => [
+                'groupNumber' => 28,
+                'startYear'   => 2022,
+                'academicYear'=> 2025,
+                'isWinterTerm'=> true,
+                'subgroups'   => $request->subgroups,
+            ],
+            'b' => $b,
+            'orderedClasses' => $this->format_generate_for_schedule_grid($b),
+        ];
+    }
+
+    private function cartesian_product(array $arrays): array {
+        $result = [[]];
+        foreach ($arrays as $array) {
+            $new = [];
+            foreach ($result as $r) {
+                foreach ($array as $item) {
+                    $new[] = array_merge($r, [$item]);
+                }
+            }
+            $result = $new;
+        }
+        return $result;
+    }
+
+    private function format_generate_for_schedule_grid(array $generated) : array {
+        uasort($generated, function ($a, $b) {
+
+            if ($this->weekCmp[$a['week']] !== $this->weekCmp[$b['week']]) {
+                return $this->weekCmp[$a['week']] <=> $this->weekCmp[$b['week']];
+            }
+
+            return $a['hour'] <=> $b['hour'];
+        });
+
+        $formatted = [];
+
+        foreach ($generated as $key => $val) {
+            [$subgroup, $subject_id, $lect_or_exer] = explode("_", $key);
+
+            $subject = Subject::where("id", $subject_id)->first();
+            if (!$subject) continue;
+
+            $formatted[$val["day"]][$subgroup][] = [
+                'id'          => $subject->id,
+                'week'        => $val['week'], // odd | even | every
+                'day'         => $val['day'],
+                'startHour'   => $val['hour'],
+                'duration'    => 2,
+                'subject'     => $subject->shortened_name,
+                'room'        => '123',
+                'isExercise'  => ($lect_or_exer == 'exercise'),
+            ];
+        }
+
+        return $formatted;
     }
 }

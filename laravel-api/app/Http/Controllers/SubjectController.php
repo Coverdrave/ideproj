@@ -8,7 +8,7 @@ use App\Models\Subject;
 class SubjectController extends Controller
 {
     public function all() {
-        return Subject::select('name')->get();
+        return Subject::select('id', 'name', 'shortened_name')->get();
     }
 
     public function create(Request $request) {

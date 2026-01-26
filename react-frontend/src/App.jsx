@@ -1,13 +1,14 @@
-import { useEffect, useState, useRef, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import "./App.css";
-import "reactjs-popup/dist/index.css";
 import ScheduleGrid from "./components/ScheduleGrid.jsx";
+import PopupModal from "./components/_PopupModal.jsx";
 
 const CreateSchedule = lazy(() => import('./components/CreateSchedule'));
 const CreateSubject = lazy(() => import('./components/CreateSubject'));
 const CreateClass = lazy(() => import('./components/CreateClass.jsx'));
 const AssignClass = lazy(() => import('./components/AssignClass.jsx'));
 const ChangeScheduleModal = lazy(() => import('./components/ChangeScheduleModal.jsx'));
+const GenerateSchedule = lazy(() => import('./components/GenerateSchedule.jsx'));
 
 export default function App() {
   const [apiData, setApiData] = useState([]);
@@ -19,7 +20,7 @@ export default function App() {
 
   const [openModal, setOpenModal] = useState(null);
   const open = (modalName) => setOpenModal(modalName);
-  const close = () => setOpenModal(null);
+  const closeModal = () => setOpenModal(null);
 
   async function getApiData() {
     const res = await fetch(
@@ -71,13 +72,17 @@ export default function App() {
             <button type="button" onClick={() => open("assignClass")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
               Добави час
             </button>
+            <button type="button" onClick={() => open("generateSchedule")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Генериране
+            </button>
 
             <Suspense>
-              {openModal === "createSchedule" && <CreateSchedule close={close} />}
-              {openModal === "createClass" && <CreateClass close={close} />}
-              {openModal === "createSubject" && <CreateSubject close={close} />}
-              {openModal === "assignClass" && <AssignClass close={close} />}
-              {openModal === "changeScheduleModal" && <ChangeScheduleModal updateData={updateData} close={close} />}
+              {openModal === "createSchedule" && <CreateSchedule close={closeModal} />}
+              {openModal === "createClass" && <CreateClass close={closeModal} />}
+              {openModal === "createSubject" && <CreateSubject close={closeModal} />}
+              {openModal === "assignClass" && <AssignClass close={closeModal} />}
+              {openModal === "changeScheduleModal" && <PopupModal close={closeModal} headerText={'Избери група'} body={<ChangeScheduleModal updateData={updateData}/>}/>}
+              {openModal === "generateSchedule" && <PopupModal close={closeModal} headerText={'Генериране'} body={<GenerateSchedule/>}/>}
             </Suspense>
           </div>
           <div>
@@ -88,7 +93,6 @@ export default function App() {
         </div>
 
         {apiData && apiData.groupInfo ? (
-          // <SchedulesTable apiData={apiData} />
           <div className="max-w-min min-w-max mx-auto">
             <ScheduleGrid apiData={apiData} />
           </div>
