@@ -111,25 +111,25 @@ class ConstraintSatisfaction {
             }
 
             // lecture must be before exercise (same subject & subgroup)
-            if ($var1_subjectid === $var2_subjectid &&
-                $var1_subgroup === $var2_subgroup
-            ) {
-                if (
-                    $var1_lect_or_exer === 'lecture' &&
-                    $var2_lect_or_exer === 'exercise' &&
-                    !$this->isBefore($var1_val, $var2_val)
-                ) {
-                    return false;
-                }
+            // if ($var1_subjectid === $var2_subjectid &&
+            //     $var1_subgroup === $var2_subgroup
+            // ) {
+            //     if (
+            //         $var1_lect_or_exer === 'lecture' &&
+            //         $var2_lect_or_exer === 'exercise' &&
+            //         !$this->isBefore($var1_val, $var2_val)
+            //     ) {
+            //         return false;
+            //     }
 
-                if (
-                    $var1_lect_or_exer === 'exercise' &&
-                    $var2_lect_or_exer === 'lecture' &&
-                    !$this->isBefore($var2_val, $var1_val)
-                ) {
-                    return false;
-                }
-            }
+            //     if (
+            //         $var1_lect_or_exer === 'exercise' &&
+            //         $var2_lect_or_exer === 'lecture' &&
+            //         !$this->isBefore($var2_val, $var1_val)
+            //     ) {
+            //         return false;
+            //     }
+            // }
 
 
         }

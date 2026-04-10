@@ -90,27 +90,21 @@ class ScheduleController extends Controller
     }
 
     public function all() {
-        $schedules = Schedule::with('studentGroup')
-            ->orderBy('academic_year')
-            ->orderBy('is_winter_term', 'desc')
-            ->get()
-            ->sortBy(fn ($schedule) =>
-                $schedule->studentGroup->group_number
+        $schedules = Schedule::query()
+            ->join('student_groups', 'student_groups.id', '=', 'schedules.student_group_id')
+            ->select(
+                'student_groups.group_number as groupNumber',
+                'student_groups.start_year as startYear',
+                'schedules.academic_year as academicYear',
+                'schedules.is_winter_term as isWinterTerm'
             )
-            ->groupBy(fn ($schedule) =>
-                $schedule->studentGroup->group_number
-            )
-            ->map(fn ($groupSchedules) => [
-                'groupNumber'   => $groupSchedules->first()->studentGroup->group_number,
-                'startYear'     => $groupSchedules->first()->studentGroup->start_year,
-                'academicYear'  => $groupSchedules->first()->academic_year,
-                'isWinterTerm' => $groupSchedules->first()->is_winter_term,
-            ])
-            ->values();
+            ->distinct()
+            ->orderBy('student_groups.group_number')
+            ->orderBy('schedules.academic_year')
+            ->orderBy('schedules.is_winter_term', 'desc')
+            ->get();
 
         return $schedules;
-
-
     }
 
     public function create(Request $request) {
@@ -184,43 +178,81 @@ class ScheduleController extends Controller
         }
         */
 
-        foreach ($request->subgroups as $subgroup) {
-            foreach ($request->subjects_options as $subject_id => $subject) {
+
+        // interwoven variables
+
+        // foreach ($request->subgroups as $subgroup) {
+        //     foreach ($request->subjects_options as $subject_id => $subject) {
+        //         $variables[] = $var_lect = $subgroup.'_'.$subject_id.'_'.'lecture';
+        //         $variables[] = $var_exer = $subgroup.'_'.$subject_id.'_'.'exercise';
+
+        //         $lect_week = $subject["lecture"]["every_week"];
+        //         $exer_week = $subject["exercise"]["every_week"];
+
+        //         if ($lect_week == $exer_week) {
+        //             foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
+        //                 $domains[$var_lect][] = [
+        //                     'day' => $day,
+        //                     'hour' => $hour,
+        //                     'week' => $week
+        //                 ];
+        //                 $domains[$var_exer][] = [
+        //                     'day' => $day,
+        //                     'hour' => $hour,
+        //                     'week' => $week
+        //                 ];
+        //             }
+        //         }
+        //         else {
+        //             foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
+        //                 $domains[$var_lect][] = [
+        //                     'day' => $day,
+        //                     'hour' => $hour,
+        //                     'week' => $week
+        //                 ];
+        //             }
+        //             foreach ($this->cartesian_product([$days, $hours, $weeks[$exer_week]]) as [$day, $hour, $week]) {
+        //                 $domains[$var_exer][] = [
+        //                     'day' => $day,
+        //                     'hour' => $hour,
+        //                     'week' => $week
+        //                 ];
+        //             }
+        //         }
+        //     }
+        // }
+
+
+        // lectures first, exercises last
+        // also subgroups grouped
+        
+        foreach ($request->subjects_options as $subject_id => $subject) {
+            foreach ($request->subgroups as $subgroup) {
                 $variables[] = $var_lect = $subgroup.'_'.$subject_id.'_'.'lecture';
-                $variables[] = $var_exer = $subgroup.'_'.$subject_id.'_'.'exercise';
 
                 $lect_week = $subject["lecture"]["every_week"];
+                foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
+                    $domains[$var_lect][] = [
+                        'day' => $day,
+                        'hour' => $hour,
+                        'week' => $week
+                    ];
+                }
+            }
+        }
+        
+        foreach ($request->subjects_options as $subject_id => $subject) {
+            foreach ($request->subgroups as $subgroup) {
+                $variables[] = $var_exer = $subgroup.'_'.$subject_id.'_'.'exercise';
+
                 $exer_week = $subject["exercise"]["every_week"];
 
-                if ($lect_week == $exer_week) {
-                    foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
-                        $domains[$var_lect][] = [
-                            'day' => $day,
-                            'hour' => $hour,
-                            'week' => $week
-                        ];
-                        $domains[$var_exer][] = [
-                            'day' => $day,
-                            'hour' => $hour,
-                            'week' => $week
-                        ];
-                    }
-                }
-                else {
-                    foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
-                        $domains[$var_lect][] = [
-                            'day' => $day,
-                            'hour' => $hour,
-                            'week' => $week
-                        ];
-                    }
-                    foreach ($this->cartesian_product([$days, $hours, $weeks[$exer_week]]) as [$day, $hour, $week]) {
-                        $domains[$var_exer][] = [
-                            'day' => $day,
-                            'hour' => $hour,
-                            'week' => $week
-                        ];
-                    }
+                foreach ($this->cartesian_product([$days, $hours, $weeks[$exer_week]]) as [$day, $hour, $week]) {
+                    $domains[$var_exer][] = [
+                        'day' => $day,
+                        'hour' => $hour,
+                        'week' => $week
+                    ];
                 }
             }
         }
@@ -236,6 +268,7 @@ class ScheduleController extends Controller
                 'isWinterTerm'=> true,
                 'subgroups'   => $request->subgroups,
             ],
+            'vars' => $variables,
             'b' => $b,
             'orderedClasses' => $this->format_generate_for_schedule_grid($b),
         ];
@@ -257,7 +290,6 @@ class ScheduleController extends Controller
 
     private function format_generate_for_schedule_grid(array $generated) : array {
         uasort($generated, function ($a, $b) {
-
             if ($this->weekCmp[$a['week']] !== $this->weekCmp[$b['week']]) {
                 return $this->weekCmp[$a['week']] <=> $this->weekCmp[$b['week']];
             }
@@ -271,7 +303,7 @@ class ScheduleController extends Controller
             [$subgroup, $subject_id, $lect_or_exer] = explode("_", $key);
 
             $subject = Subject::where("id", $subject_id)->first();
-            if (!$subject) continue;
+            if (!$subject) continue; //?
 
             $formatted[$val["day"]][$subgroup][] = [
                 'id'          => $subject->id,
@@ -283,6 +315,11 @@ class ScheduleController extends Controller
                 'room'        => '123',
                 'isExercise'  => ($lect_or_exer == 'exercise'),
             ];
+        }
+
+        // Sort subgroups
+        foreach ($formatted as $day => $subgroups) {
+            ksort($formatted[$day]);
         }
 
         return $formatted;
