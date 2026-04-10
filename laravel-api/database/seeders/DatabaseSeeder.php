@@ -28,6 +28,10 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Операционни системи', 'shortened_name' => 'Операц. с-ми'],
             ['name' => 'Уеб програмиране', 'shortened_name' => 'Уеб прогр.'],
             ['name' => 'Мултимедиини системи и технологии', 'shortened_name' => 'Мултисист. и техн.'],
+            ['name' => 'Локални мрежи', 'shortened_name' => 'Локални мрежи'],
+            ['name' => 'Компютърни графични системи', 'shortened_name' => 'Комп. граф. с-ми'],
+            ['name' => 'Компютърно зрение', 'shortened_name' => 'Комп. зрение'],
+            ['name' => 'Разпределени уеб приложения', 'shortened_name' => 'Разпр. уеб. прил.'],
         ])->mapWithKeys(function ($data) {
             return [
                 $data['name'] => Subject::firstOrCreate($data)
@@ -78,8 +82,83 @@ class DatabaseSeeder extends Seeder
 
         $schedule27A = makeSchedule($groups['27А'], 2025, true);
         $schedule27B = makeSchedule($groups['27Б'], 2025, true);
+        $schedule27ASummer = makeSchedule($groups['27А'], 2025, false);
         $schedule26A = makeSchedule($groups['26А'], 2025, true);
         $schedule26B = makeSchedule($groups['26Б'], 2025, true);
+
+        $schedule27ASummer->uniClasses()->syncWithoutDetaching([
+            classSlot(
+                $subjects['Локални мрежи']->id,
+                1,
+                10,
+                '2.203',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Компютърни графични системи']->id,
+                1,
+                12,
+                '2Б.203',
+                'every',
+                false
+            )->id,
+
+            classSlot(
+                $subjects['Компютърно зрение']->id,
+                2,
+                10,
+                '6.301',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Компютърни графични системи']->id,
+                2,
+                12,
+                '6.301',
+                'every',
+                true,
+                3
+            )->id,
+
+            classSlot(
+                $subjects['Локални мрежи']->id,
+                3,
+                11,
+                '6.308',
+                'every',
+                true,
+                3
+            )->id,
+            classSlot(
+                $subjects['Разпределени уеб приложения']->id,
+                3,
+                14,
+                '1.407',
+                'every',
+                false
+            )->id,
+            classSlot(
+                $subjects['Разпределени уеб приложения']->id,
+                3,
+                16,
+                '6.207',
+                'every',
+                true,
+                3
+            )->id,
+
+            classSlot(
+                $subjects['Компютърно зрение']->id,
+                4,
+                12,
+                '6.401',
+                'every',
+                true,
+                3
+            )->id,
+        ]);
         
         $schedule27A->uniClasses()->syncWithoutDetaching([
             classSlot(

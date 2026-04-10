@@ -16,7 +16,7 @@ export default function App() {
   const [groupNumber, setGroupNumber] = useState("27");
   const [startYear, setStartYear] = useState("2022");
   const [academicYear, setAcademicYear] = useState("2025");
-  const [isWinterTerm, setIsWinterTerm] = useState(true);
+  const [isWinterTerm, setIsWinterTerm] = useState(false);
 
   const [openModal, setOpenModal] = useState(null);
   const open = (modalName) => setOpenModal(modalName);

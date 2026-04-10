@@ -25,24 +25,24 @@ export default function ScheduleGrid({ apiData }) {
   let gridRows = 1 + (daysCount*subgroupsCount*2);
 
 
-  function cellKey(day, hour) {
-    return `${day}-${hour}`;
+  function cellKey(day, subgroup, week, hour) {
+    return `${day}-${subgroup}-${week}-${hour}`;
   }
 
-  function startSelection(day, hour) {
+  function startSelection(day, subgroup, week, hour) {
     setIsSelecting(true);
-    setSelection([{ day, hour }]);
+    setSelection([{ day, subgroup, week, hour }]);
   }
 
-  function extendSelection(day, hour) {
+  function extendSelection(day, subgroup, week, hour) {
     if (!isSelecting) return;
 
     setSelection(prev => {
-      const key = cellKey(day, hour);
-      if (prev.some(c => cellKey(c.day, c.hour) === key)) {
+      const key = cellKey(day, subgroup, week, hour);
+      if (prev.some(c => cellKey(c.day, c.subgroup, c.week, c.hour) === key)) {
         return prev;
       }
-      return [...prev, { day, hour }];
+      return [...prev, { day, subgroup, week, hour }];
     });
   }
 
@@ -51,9 +51,9 @@ export default function ScheduleGrid({ apiData }) {
     console.log("Selected cells:", selection);
   }
 
-  function isCellSelected(day, hour) {
+  function isCellSelected(day, subgroup, week, hour) {
     return selection.some(
-      c => c.day === day && c.hour === hour
+      c => c.day === day && c.subgroup === subgroup && c.week === week && c.hour === hour
     );
   }
 
@@ -122,7 +122,7 @@ export default function ScheduleGrid({ apiData }) {
         ГРУПА: {apiData.groupInfo.groupNumber}
       </p>
       <p className="text-end">
-        {apiData.groupInfo.isWinterTerm ? "ЗИМЕН" : "ЛЕТЕН"} СЕМЕСТЪР
+        {apiData.groupInfo.isWinterTerm == 1 ? "ЗИМЕН" : "ЛЕТЕН"} СЕМЕСТЪР
         &emsp; {apiData.groupInfo.academicYear}/{parseInt(apiData.groupInfo.academicYear) + 1}г.
       </p>
     </div>
@@ -130,7 +130,7 @@ export default function ScheduleGrid({ apiData }) {
     <div
       // className="grid relative user-select-none border border-black shadow-md text-center gap-[1px]"
       // className="grid relative text-center user-select-none shadow-md outline outline-2 gap-[1px]"
-      className="grid relative text-center user-select-none shadow-md outline outline-2 outline-black"
+      className="grid relative text-center user-select-none shadow-md outline outline-2 outline-black select-none"
       style={{
         gridTemplateColumns: `repeat(3, auto) repeat(${HOURS.length}, 10ch)`,
         gridTemplateRows: `auto repeat(${gridRows-1}, 1fr)`,
@@ -314,7 +314,7 @@ export default function ScheduleGrid({ apiData }) {
                         // onClick={() => setSelectedClass(cls)}
                         >
                           <strong>{cls.subject}</strong>
-                          <br/>
+                          {/* <br/> */}
                           <small>{cls.isExercise ? "упражнение" : "лекция"}, {cls.room}</small>
                         </div>
                       )
@@ -324,17 +324,18 @@ export default function ScheduleGrid({ apiData }) {
 
                       return (
                         // <div className="outline outline-1 outline-[#eee] bg-white"
-                        <div className="border-l border-t border-[#eee] bg-white"
+                        <div 
+                          className={`border-l border-t border-[#eee] cell 
+                            ${isCellSelected(dayIndex, subgroupKey, weekText, hour) ? "bg-[#d1fad5]" : "bg-white"}
+                            hover:bg-[#c2c2c2]`}
                           style={{
                             gridColumnStart: hourReached - 4,
                             gridRowStart: weekRowStart,
                           }}
-                            // key={cellKey(dayIndex, hour)}
-                            // className={`cell ${
-                            // isCellSelected(dayIndex, hour) ? "bg-[#d0ebff]" : ""
-                            // }`}
-                            // onMouseDown={() => startSelection(dayIndex, hour)}
-                            // onMouseEnter={() => extendSelection(dayIndex, hour)}
+                          key={cellKey(dayIndex, subgroupKey, weekText, hour)}
+                          onMouseDown={() => startSelection(dayIndex, subgroupKey, weekText, hour)}
+                          onMouseEnter={() => extendSelection(dayIndex, subgroupKey, weekText, hour)}
+                          onMouseUp={() => endSelection()}
                         />
                       )
                     }
