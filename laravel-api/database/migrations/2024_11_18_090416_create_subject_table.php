@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('shortened_name');
+            $table->unsignedTinyInteger('study_semester');
 
             $table->foreignId('specialty_id')->constrained()->cascadeOnDelete();
 
