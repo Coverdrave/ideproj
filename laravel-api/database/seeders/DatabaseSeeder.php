@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Faculty;
+use App\Models\Lecturer;
 use App\Models\Schedule;
 use App\Models\Specialty;
 use App\Models\Subject;
@@ -62,6 +63,62 @@ class DatabaseSeeder extends Seeder
                 $data['name'] => Subject::firstOrCreate($data)
             ];
         });
+
+        $lecturers = collect([
+            ['names' => 'Йордан Калмуков', 'titles' => 'доц. д-р'],
+            ['names' => 'Цанко Големанов', 'titles' => 'гл. ас. д-р'],
+            ['names' => 'Георги Кръстев', 'titles' => 'проф.'],
+            ['names' => 'Николай Костадинов' , 'titles' => 'гл. ас. д-р'],
+            ['names' => 'Цветозар Георгиев' , 'titles' => 'проф. д-р'],
+            ['names' => 'Цветелина Кънева' , 'titles' => 'гл. ас. д-р'],
+            ['names' => 'Анелия Иванова' , 'titles' => 'доц. д-р'],
+            ['names' => 'Орлин Томов' , 'titles' => 'ас.'],
+            ['names' => 'Ирена Вълова' , 'titles' => 'доц.'],
+            ['names' => 'Елица Ибрямова' , 'titles' => 'гл. ас. д-р'],
+            ['names' => 'Светлана Стефанова' , 'titles' => 'доц. д-р'],
+        ])->mapWithKeys(function ($data) {
+            return [
+                $data['names'] => Lecturer::firstOrCreate($data)
+            ];
+        });
+
+        $lecturers['Йордан Калмуков']->subjects()->syncWithoutDetaching([
+            $subjects['Уеб програмиране']->id => ['type' => 'both'],
+            $subjects['Разпределени уеб приложения']->id => ['type' => 'both']
+        ]);
+        $lecturers['Цанко Големанов']->subjects()->syncWithoutDetaching([
+            $subjects['Операционни системи']->id => ['type' => 'both'],
+            $subjects['Езикови процесори']->id => ['type' => 'exercise']
+        ]);
+        $lecturers['Георги Кръстев']->subjects()->syncWithoutDetaching([
+            $subjects['Компютърни мрежи']->id => ['type' => 'lecture'],
+            $subjects['Локални мрежи']->id => ['type' => 'lecture']
+        ]);
+        $lecturers['Николай Костадинов']->subjects()->syncWithoutDetaching([
+            $subjects['Компютърни мрежи']->id => ['type' => 'exercise'],
+        ]);
+        $lecturers['Цветозар Георгиев']->subjects()->syncWithoutDetaching([
+            $subjects['Мултимедиини системи и технологии']->id => ['type' => 'both'],
+        ]);
+        $lecturers['Цветелина Кънева']->subjects()->syncWithoutDetaching([
+            $subjects['Информационни системи']->id => ['type' => 'both'],
+            $subjects['Компютърно зрение']->id => ['type' => 'exercise'],
+        ]);
+        $lecturers['Анелия Иванова']->subjects()->syncWithoutDetaching([
+            $subjects['Езикови процесори']->id => ['type' => 'lecture'],
+        ]);
+        $lecturers['Орлин Томов']->subjects()->syncWithoutDetaching([
+            $subjects['Локални мрежи']->id => ['type' => 'exercise'],
+        ]);
+        $lecturers['Ирена Вълова']->subjects()->syncWithoutDetaching([
+            $subjects['Компютърно зрение']->id => ['type' => 'lecture'],
+        ]);
+        $lecturers['Елица Ибрямова']->subjects()->syncWithoutDetaching([
+            $subjects['Компютърни графични системи']->id => ['type' => 'exercise'],
+        ]);
+        $lecturers['Светлана Стефанова']->subjects()->syncWithoutDetaching([
+            $subjects['Компютърни графични системи']->id => ['type' => 'lecture'],
+        ]);
 
         $groups = collect([
             ['group_number' => 27, 'subgroup' => 'А', 'start_year' => 2022],

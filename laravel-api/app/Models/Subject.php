@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Subject extends Model
 {
@@ -32,6 +33,13 @@ class Subject extends Model
     public function uniClasses()
     {
         return $this->hasMany(UniClass::class);
+    }
+
+    public function lecturers(): BelongsToMany
+    {
+        return $this->belongsToMany(Lecturer::class)
+                    ->withPivot('type')
+                    ->withTimestamps();
     }
 }
 
