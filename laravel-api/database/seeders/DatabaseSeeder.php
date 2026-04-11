@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Faculty;
 use App\Models\Schedule;
+use App\Models\Specialty;
 use App\Models\Subject;
 use App\Models\UniClass;
 use Illuminate\Database\Seeder;
@@ -21,17 +23,40 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+        $faculties = collect([
+            ['name' => 'Електротехника, електроника и автоматика', 'short_name' => 'ЕЕА']
+        ])->mapWithKeys(function ($data) {
+            return [
+                $data['short_name'] => Faculty::firstOrCreate($data)
+            ];
+        });
+
+        $specialties = collect([
+            [
+                'name' => 'Компютърни системи и технологии', 
+                'short_name' => 'КСТ', 
+                'faculty_id' => $faculties['ЕЕА']->id,
+                'degree_level' => 'bachelor',
+                'duration_semester' => 8,
+                'is_part_time' => false
+            ]
+        ])->mapWithKeys(function ($data) {
+            return [
+                $data['short_name'] => Specialty::firstOrCreate($data)
+            ];
+        });
+
         $subjects = collect([
-            ['name' => 'Информационни системи', 'shortened_name' => 'Инф. с-ми'],
-            ['name' => 'Езикови процесори', 'shortened_name' => 'Език. процесори'],
-            ['name' => 'Компютърни мрежи', 'shortened_name' => 'Комп. мрежи'],
-            ['name' => 'Операционни системи', 'shortened_name' => 'Операц. с-ми'],
-            ['name' => 'Уеб програмиране', 'shortened_name' => 'Уеб прогр.'],
-            ['name' => 'Мултимедиини системи и технологии', 'shortened_name' => 'Мултисист. и техн.'],
-            ['name' => 'Локални мрежи', 'shortened_name' => 'Локални мрежи'],
-            ['name' => 'Компютърни графични системи', 'shortened_name' => 'Комп. граф. с-ми'],
-            ['name' => 'Компютърно зрение', 'shortened_name' => 'Комп. зрение'],
-            ['name' => 'Разпределени уеб приложения', 'shortened_name' => 'Разпр. уеб. прил.'],
+            ['name' => 'Информационни системи', 'shortened_name' => 'Инф. с-ми', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Езикови процесори', 'shortened_name' => 'Език. процесори', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Компютърни мрежи', 'shortened_name' => 'Комп. мрежи', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Операционни системи', 'shortened_name' => 'Операц. с-ми', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Уеб програмиране', 'shortened_name' => 'Уеб прогр.', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Мултимедиини системи и технологии', 'shortened_name' => 'Мултисист. и техн.', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Локални мрежи', 'shortened_name' => 'Локални мрежи', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Компютърни графични системи', 'shortened_name' => 'Комп. граф. с-ми', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Компютърно зрение', 'shortened_name' => 'Комп. зрение', 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Разпределени уеб приложения', 'shortened_name' => 'Разпр. уеб. прил.', 'specialty_id' => $specialties['КСТ']->id],
         ])->mapWithKeys(function ($data) {
             return [
                 $data['name'] => Subject::firstOrCreate($data)

@@ -42,12 +42,12 @@ return new class extends Migration
             ]);
 
             // Same room cannot be double-booked
-            $table->unique([
-                'room',
-                'start_hour',
-                'day',
-                'week'
-            ]);
+            // $table->unique([
+            //     'room',
+            //     'start_hour',
+            //     'day',
+            //     'week'
+            // ]);
         });
     }
 
