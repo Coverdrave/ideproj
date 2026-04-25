@@ -121,10 +121,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $groups = collect([
-            ['group_number' => 27, 'subgroup' => 'А', 'start_year' => 2022],
-            ['group_number' => 27, 'subgroup' => 'Б', 'start_year' => 2022],
-            ['group_number' => 26, 'subgroup' => 'А', 'start_year' => 2022],
-            ['group_number' => 26, 'subgroup' => 'Б', 'start_year' => 2022],
+            ['group_number' => 27, 'subgroup' => 'А', 'start_year' => 2022, 'specialty_id' => $specialties['КСТ']->id],
+            ['group_number' => 27, 'subgroup' => 'Б', 'start_year' => 2022, 'specialty_id' => $specialties['КСТ']->id],
+            ['group_number' => 26, 'subgroup' => 'А', 'start_year' => 2022, 'specialty_id' => $specialties['КСТ']->id],
+            ['group_number' => 26, 'subgroup' => 'Б', 'start_year' => 2022, 'specialty_id' => $specialties['КСТ']->id],
         ])->mapWithKeys(function ($data) {
             return [
                 "{$data['group_number']}{$data['subgroup']}" =>

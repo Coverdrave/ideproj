@@ -16,4 +16,9 @@ class StudentGroup extends Model
     {
         return $this->hasMany(Schedule::class);
     }
+
+    public function specialty()
+    {
+        return $this->belongsTo(StudentGroup::class);
+    }
 }
