@@ -159,6 +159,7 @@ class DatabaseSeeder extends Seeder
             ], [
                 'duration' => $duration,
                 'is_exercise' => $isExercise,
+                'lecturer_id' => 1
             ]);
         }
 

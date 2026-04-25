@@ -20,6 +20,10 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
+            $table->foreignId('lecturer_id')
+                ->constrained('lecturers')
+                ->cascadeOnDelete();
+
             $table->tinyInteger('start_hour'); // 0–23
             $table->tinyInteger('duration');   // >=1
             $table->tinyInteger('day');        // 1–7

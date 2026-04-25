@@ -32,5 +32,10 @@ class UniClass extends Model
             'schedule_uni_class'
         )->withTimestamps();
     }
+
+    public function lecturer()
+    {
+        return $this->belongsTo(Lecturer::class);
+    }
 }
 
