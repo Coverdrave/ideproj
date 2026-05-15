@@ -226,39 +226,55 @@ class ScheduleController extends Controller
         // lectures first, exercises last
         // also subgroups grouped
         
-        foreach ($request->subjects_options as $subject_id => $subject) {
+        foreach ($request->subjects_options as $subject_id => $subject_options) {
+            $lect_week = $subject_options["lecture"]["every_week"];
+            $lecturers = Subject::find($subject_id)
+                            ->lecturers()
+                            ->wherePivotIn('type', ['lecture', 'both'])
+                            ->pluck('lecturer_id');
+
             foreach ($request->subgroups as $subgroup) {
                 $variables[] = $var_lect = $subgroup.'_'.$subject_id.'_'.'lecture';
 
-                $lect_week = $subject["lecture"]["every_week"];
-                foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
+                foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week], $lecturers]) as [$day, $hour, $week, $lecturer_id]) {
                     $domains[$var_lect][] = [
                         'day' => $day,
                         'hour' => $hour,
-                        'week' => $week
+                        'week' => $week,
+                        'lecturer_id' => $lecturer_id
                     ];
                 }
             }
         }
         
-        foreach ($request->subjects_options as $subject_id => $subject) {
+        foreach ($request->subjects_options as $subject_id => $subject_options) {
+            $exer_week = $subject_options["exercise"]["every_week"];
+            $lecturers = Subject::find($subject_id)
+                            ->lecturers()
+                            ->wherePivotIn('type', ['exercise', 'both'])
+                            ->pluck('lecturer_id');
+
             foreach ($request->subgroups as $subgroup) {
                 $variables[] = $var_exer = $subgroup.'_'.$subject_id.'_'.'exercise';
 
-                $exer_week = $subject["exercise"]["every_week"];
-
-                foreach ($this->cartesian_product([$days, $hours, $weeks[$exer_week]]) as [$day, $hour, $week]) {
+                foreach ($this->cartesian_product([$days, $hours, $weeks[$exer_week], $lecturers]) as [$day, $hour, $week, $lecturer_id]) {
                     $domains[$var_exer][] = [
                         'day' => $day,
                         'hour' => $hour,
-                        'week' => $week
+                        'week' => $week,
+                        'lecturer_id' => $lecturer_id
                     ];
                 }
             }
         }
 
+        // dd($variables, $domains);
+
         $csp = new ConstraintSatisfaction($variables, $domains);
-        $b = $csp->backtracking_search();
+        // $b = $csp->backtracking_search();
+        $b = $csp->solve();
+
+        // dd($b);
 
         return [
             'groupInfo' => [

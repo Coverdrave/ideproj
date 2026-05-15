@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\SpecialtyController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UniClassController;
 use App\Models\Subject;
@@ -29,3 +31,8 @@ Route::get('/uni_class/get_compatible_classes', [UniClassController::class, 'get
 Route::post('/uni_class/create', [UniClassController::class, 'create']);
 Route::post('/uni_class/assign_to_schedules', [UniClassController::class, 'assign_to_schedules']);
 
+// Route::get('faculty/all', [FacultyController::class, 'all']);
+Route::get('faculty/all_with_specialties', [FacultyController::class, 'all_with_specialties']);
+// Route::get('faculty/specialties/{faculty_id}', [FacultyController::class, 'all_specialties']);
+
+Route::get('specialty/{specialty_id}/semester_subjects/{semester}', [SpecialtyController::class, 'get_specialty_subjects_by_semester']);
