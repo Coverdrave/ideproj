@@ -286,7 +286,7 @@ class ScheduleController extends Controller
             ],
             'vars' => $variables,
             'b' => $b,
-            'orderedClasses' => $this->format_generate_for_schedule_grid($b),
+            'orderedClasses' => $this->format_generate_for_schedule_grid($b, $request->subgroups, $days),
         ];
     }
 
@@ -304,7 +304,7 @@ class ScheduleController extends Controller
         return $result;
     }
 
-    private function format_generate_for_schedule_grid(array $generated) : array {
+    private function format_generate_for_schedule_grid(array $generated, array $subgroups, array $days) : array {
         uasort($generated, function ($a, $b) {
             if ($this->weekCmp[$a['week']] !== $this->weekCmp[$b['week']]) {
                 return $this->weekCmp[$a['week']] <=> $this->weekCmp[$b['week']];
@@ -314,12 +314,19 @@ class ScheduleController extends Controller
         });
 
         $formatted = [];
+        foreach ($days as $day) {
+            foreach ($subgroups as $subgroup) {
+                $formatted[$day][$subgroup] = [];
+            }
+        }
 
         foreach ($generated as $key => $val) {
             [$subgroup, $subject_id, $lect_or_exer] = explode("_", $key);
 
             $subject = Subject::where("id", $subject_id)->first();
             if (!$subject) continue; //?
+
+            
 
             $formatted[$val["day"]][$subgroup][] = [
                 'id'          => $subject->id,

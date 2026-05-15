@@ -421,7 +421,7 @@ export default function GenerateSchedule({ close }) {
   );
 
   const resultBody = (
-    <div className="flex w-min max-h-min flex-col p-3">
+    <div className="flex w-min max-h-[min(85vh,calc(100vh-4rem))] flex-col p-3">
       <button
         type="button"
         onClick={handleBackToOptions}
