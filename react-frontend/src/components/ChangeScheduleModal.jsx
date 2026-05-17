@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import PopupModal from "./_PopupModal.jsx";
 
-export default function App({ updateData }) {
+export default function ChangeScheduleModal({ close, updateData }) {
   const [allSchedules, setAllSchedules] = useState([]);
 
   async function getAllSchedules() {
@@ -16,7 +17,7 @@ export default function App({ updateData }) {
     getAllSchedules();
   }, []);
 
-  return (
+  const body = (
       <div className="grid"
         style={{
           gridTemplateColumns: `auto`,
@@ -59,7 +60,7 @@ export default function App({ updateData }) {
                   schedule.academicYear,
                   schedule.isWinterTerm
                 );
-                // closeModal();
+                close();
               }}
             >
               <div className="px-1 text-center">
@@ -76,4 +77,6 @@ export default function App({ updateData }) {
         ))}
       </div>
   )
+
+  return <PopupModal close={close} headerText={'Избери група'} body={body}/>;
 }

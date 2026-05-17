@@ -150,7 +150,7 @@ class ScheduleController extends Controller
         $domains = [];
 
         $days = range(1, 5, 1);
-        $hours = range(8, 14, 2);
+        $hours = range(8, 14, 1);
         $weeks = [
             0 => [
                 'odd', 'even'
@@ -228,6 +228,7 @@ class ScheduleController extends Controller
         
         foreach ($request->subjects_options as $subject_id => $subject_options) {
             $lect_week = $subject_options["lecture"]["every_week"];
+            $duration = $subject_options["lecture"]["duration"];
             $lecturers = Subject::find($subject_id)
                             ->lecturers()
                             ->wherePivotIn('type', ['lecture', 'both'])
@@ -241,6 +242,7 @@ class ScheduleController extends Controller
                         'day' => $day,
                         'hour' => $hour,
                         'week' => $week,
+                        'duration' => $duration,
                         'lecturer_id' => $lecturer_id
                     ];
                 }
@@ -249,6 +251,7 @@ class ScheduleController extends Controller
         
         foreach ($request->subjects_options as $subject_id => $subject_options) {
             $exer_week = $subject_options["exercise"]["every_week"];
+            $duration = $subject_options["exercise"]["duration"];
             $lecturers = Subject::find($subject_id)
                             ->lecturers()
                             ->wherePivotIn('type', ['exercise', 'both'])
@@ -262,6 +265,7 @@ class ScheduleController extends Controller
                         'day' => $day,
                         'hour' => $hour,
                         'week' => $week,
+                        'duration' => $duration,
                         'lecturer_id' => $lecturer_id
                     ];
                 }
@@ -277,6 +281,7 @@ class ScheduleController extends Controller
         // dd($b);
 
         return [
+            'options' => $request->subjects_options,
             'groupInfo' => [
                 'groupNumber' => 28,
                 'startYear'   => 2022,
@@ -333,7 +338,7 @@ class ScheduleController extends Controller
                 'week'        => $val['week'], // odd | even | every
                 'day'         => $val['day'],
                 'startHour'   => $val['hour'],
-                'duration'    => 2,
+                'duration'    => $val['duration'],
                 'subject'     => $subject->shortened_name,
                 'room'        => '123',
                 'isExercise'  => ($lect_or_exer == 'exercise'),

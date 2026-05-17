@@ -20,18 +20,29 @@ class ConstraintSatisfaction {
         // Group hours by subgroup and day
         foreach ($assignment as $var => $val) {
             $subgroup = explode("_", $var)[0];
-            $groups[$subgroup][$val['day']][] = $val['hour'];
+            $groups[$subgroup][$val['day']][] = [
+                'start' => $val['hour'],
+                'duration' => $val['duration']
+            ];
         }
 
         foreach ($groups as $days) {
             foreach ($days as $hours) {
                 if (count($hours) < 2) continue;
-                sort($hours);
-                // Gap = (Last class - First class) - (Number of classes * duration)
-                // If classes are 2 hours long:
-                $daySpan = end($hours) - $hours[0];
-                $actualClassTime = (count($hours) - 1) * 2; // fix
-                $gaps += max(0, $daySpan - $actualClassTime);
+                
+                usort($hours, function ($a, $b) {
+                    return $a['start'] <=> $b['start'];
+                });
+
+                $last_class = end($hours);
+                $last_class_end = $last_class['start'] + $last_class['duration'];
+                $day_span = $last_class_end - $hours[0]['start'];
+                $class_time = 0;
+                foreach ($hours as $class) {
+                    $class_time += $class['duration'];
+                }
+
+                $gaps += max(0, $day_span - $class_time);
             }
         }
         return $gaps;
@@ -115,38 +126,30 @@ class ConstraintSatisfaction {
             $var2_week = $var2_val['week'];
             $var2_lecturer = $var2_val['lecturer_id'];
 
+            $same_time = ($var1_day == $var2_day &&
+                $this->weeksOverlap($var1_week, $var2_week) &&
+                $this->durationOverlap($var1_hour, $var1_val['duration'], $var2_hour, $var2_val['duration']));
+
             // If same subject and they're both lectures
-            if (
-                $var1_subjectid === $var2_subjectid &&
+            if ($var1_subjectid === $var2_subjectid &&
                 $var1_lect_or_exer === 'lecture' &&
                 $var2_lect_or_exer === 'lecture'
             ) {
                 // Different times (forbidden)
-                if (
-                    $var1_day !== $var2_day ||
-                    $var1_hour !== $var2_hour ||
-                    $var1_week !== $var2_week // Maybe needs to be weeksOverlap?
-                ) {
+                if (!$same_time) {
                     return false;
                 }
 
                 // Different lecturer (forbidden)
-                if (
-                    $var1_lecturer !== $var2_lecturer
-                ) {
+                if ($var1_lecturer !== $var2_lecturer) {
                     return false;
                 }
             }
 
             // If held at the same time
-            if (
-                $var1_day == $var2_day &&
-                $var1_hour == $var2_hour &&
-                $this->weeksOverlap($var1_week, $var2_week)
-            ) {
+            if ($same_time) {
                 // SAME SUBJECT LECTURE (allowed)
-                if (
-                    $var1_subjectid === $var2_subjectid &&
+                if ($var1_subjectid === $var2_subjectid &&
                     $var1_lect_or_exer === 'lecture' &&
                     $var2_lect_or_exer === 'lecture'
                 ) {
@@ -154,8 +157,7 @@ class ConstraintSatisfaction {
                 }
 
                 // SAME SUBJECT EXERCISE (forbidden)
-                if (
-                    $var1_subjectid === $var2_subjectid &&
+                if ($var1_subjectid === $var2_subjectid &&
                     $var1_lect_or_exer === 'exercise' &&
                     $var2_lect_or_exer === 'exercise' &&
                     $var1_lecturer === $var2_lecturer
@@ -169,51 +171,26 @@ class ConstraintSatisfaction {
                 }
 
                 // LECTURE blocks everything else
-                if (
-                    $var1_lect_or_exer === 'lecture' ||
+                if ($var1_lect_or_exer === 'lecture' ||
                     $var2_lect_or_exer === 'lecture'
                 ) {
-                    // dd($var1, $var1_val, $var2, $var2_val);
                     return false;
                 }
             }
-
-            // lecture must be before exercise (same subject & subgroup)
-            // if ($var1_subjectid === $var2_subjectid &&
-            //     $var1_subgroup === $var2_subgroup
-            // ) {
-            //     if (
-            //         $var1_lect_or_exer === 'lecture' &&
-            //         $var2_lect_or_exer === 'exercise' &&
-            //         !$this->isBefore($var1_val, $var2_val)
-            //     ) {
-            //         return false;
-            //     }
-
-            //     if (
-            //         $var1_lect_or_exer === 'exercise' &&
-            //         $var2_lect_or_exer === 'lecture' &&
-            //         !$this->isBefore($var2_val, $var1_val)
-            //     ) {
-            //         return false;
-            //     }
-            // }
-
-
         }
 
         return true;
+    }
+
+    private function durationOverlap(int $start1, int $duration1, int $start2, int $duration2) : bool {
+        $end1 = $start1 + $duration1;
+        $end2 = $start2 + $duration2;
+
+        return ($start2 < $end1 && $end2 > $start1);
     }
 
     private function weeksOverlap(string $w1, string $w2): bool {
         if ($w1 === 'every' || $w2 === 'every') return true;
         return $w1 === $w2;
     }
-
-    private function isBefore(array $a, array $b): bool {
-        return
-            $a['day'] < $b['day'] ||
-            ($a['day'] === $b['day'] && $a['hour'] < $b['hour']);
-    }
-
 }

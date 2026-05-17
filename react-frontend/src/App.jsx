@@ -81,7 +81,7 @@ export default function App() {
               {openModal === "createClass" && <CreateClass close={closeModal} />}
               {openModal === "createSubject" && <CreateSubject close={closeModal} />}
               {openModal === "assignClass" && <AssignClass close={closeModal} />}
-              {openModal === "changeScheduleModal" && <PopupModal close={closeModal} headerText={'Избери група'} body={<ChangeScheduleModal updateData={updateData}/>}/>}
+              {openModal === "changeScheduleModal" && <ChangeScheduleModal close={closeModal} updateData={updateData}/>}
               {openModal === "generateSchedule" && <GenerateSchedule close={closeModal} />}
             </Suspense>
           </div>

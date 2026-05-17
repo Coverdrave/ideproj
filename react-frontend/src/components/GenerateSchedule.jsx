@@ -113,12 +113,12 @@ export default function GenerateSchedule({ close }) {
     semesterSubjects.forEach((subject) => {
       nextOptions[subject.id] = {
         lecture: {
-          every_week:
-            subjectOptions[subject.id]?.lecture?.every_week ?? true,
+          every_week: subjectOptions[subject.id]?.lecture?.every_week ?? true,
+          duration: subject.default_duration_lecture
         },
         exercise: {
-          every_week:
-            subjectOptions[subject.id]?.exercise?.every_week ?? true,
+          every_week: subjectOptions[subject.id]?.exercise?.every_week ?? true,
+          duration: subject.default_duration_exercise
         },
       };
     });
