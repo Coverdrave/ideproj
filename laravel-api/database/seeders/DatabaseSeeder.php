@@ -48,16 +48,66 @@ class DatabaseSeeder extends Seeder
         });
 
         $subjects = collect([
-            ['name' => 'Информационни системи', 'shortened_name' => 'Инф. с-ми', 'study_semester' => 7, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Езикови процесори', 'shortened_name' => 'Език. процесори', 'study_semester' => 7, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Компютърни мрежи', 'shortened_name' => 'Комп. мрежи', 'study_semester' => 7, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Операционни системи', 'shortened_name' => 'Операц. с-ми', 'study_semester' => 7, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Уеб програмиране', 'shortened_name' => 'Уеб прогр.', 'study_semester' => 7, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Мултимедиини системи и технологии', 'shortened_name' => 'Мултисист. и техн.', 'study_semester' => 8, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Локални мрежи', 'shortened_name' => 'Локални мрежи', 'study_semester' => 8, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Компютърни графични системи', 'shortened_name' => 'Комп. граф. с-ми', 'study_semester' => 8, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Компютърно зрение', 'shortened_name' => 'Комп. зрение', 'study_semester' => 8, 'specialty_id' => $specialties['КСТ']->id],
-            ['name' => 'Разпределени уеб приложения', 'shortened_name' => 'Разпр. уеб. прил.', 'study_semester' => 8, 'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Информационни системи',
+             'shortened_name' => 'Инф. с-ми',
+             'study_semester' => 7,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 2,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Езикови процесори',
+             'shortened_name' => 'Език. процесори',
+             'study_semester' => 7,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 2,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Компютърни мрежи',
+             'shortened_name' => 'Комп. мрежи',
+             'study_semester' => 7,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 2,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Операционни системи',
+             'shortened_name' => 'Операц. с-ми',
+             'study_semester' => 7,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 2,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Уеб програмиране',
+             'shortened_name' => 'Уеб прогр.',
+             'study_semester' => 7,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 2,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Мултимедиини системи и технологии',
+             'shortened_name' => 'Мултисист. и техн.',
+             'study_semester' => 7,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 2,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Локални мрежи',
+             'shortened_name' => 'Локални мрежи',
+             'study_semester' => 8,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 3,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Компютърни графични системи',
+             'shortened_name' => 'Комп. граф. с-ми',
+             'study_semester' => 8,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 3,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Компютърно зрение',
+             'shortened_name' => 'Комп. зрение',
+             'study_semester' => 8,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 3,
+             'specialty_id' => $specialties['КСТ']->id],
+            ['name' => 'Разпределени уеб приложения',
+             'shortened_name' => 'Разпр. уеб. прил.',
+             'study_semester' => 8,
+             'default_duration_lecture' => 2,
+             'default_duration_exercise' => 3,
+             'specialty_id' => $specialties['КСТ']->id],
         ])->mapWithKeys(function ($data) {
             return [
                 $data['name'] => Subject::firstOrCreate($data)
@@ -142,24 +192,23 @@ class DatabaseSeeder extends Seeder
         }
 
         function classSlot(
-            $subjectId,
+            $subject,
             $day,
             $start,
             $room,
             $week,
-            $isExercise,
-            $duration = 2
+            $isExercise
         ) {
             return UniClass::firstOrCreate([
-                'subject_id' => $subjectId,
+                'subject_id' => $subject->id,
                 'day' => $day,
                 'start_hour' => $start,
                 'week' => $week,
                 'room' => $room,
             ], [
-                'duration' => $duration,
                 'is_exercise' => $isExercise,
-                'lecturer_id' => 1
+                'duration' => $isExercise ? $subject->default_duration_exercise : $subject->default_duration_lecture,
+                'lecturer_id' => 1 //fix
             ]);
         }
 
@@ -171,7 +220,7 @@ class DatabaseSeeder extends Seeder
 
         $schedule27ASummer->uniClasses()->syncWithoutDetaching([
             classSlot(
-                $subjects['Локални мрежи']->id,
+                $subjects['Локални мрежи'],
                 1,
                 10,
                 '2.203',
@@ -179,7 +228,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Компютърни графични системи']->id,
+                $subjects['Компютърни графични системи'],
                 1,
                 12,
                 '2Б.203',
@@ -188,7 +237,7 @@ class DatabaseSeeder extends Seeder
             )->id,
 
             classSlot(
-                $subjects['Компютърно зрение']->id,
+                $subjects['Компютърно зрение'],
                 2,
                 10,
                 '6.301',
@@ -196,26 +245,24 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Компютърни графични системи']->id,
+                $subjects['Компютърни графични системи'],
                 2,
                 12,
                 '6.301',
                 'every',
-                true,
-                3
+                true
             )->id,
 
             classSlot(
-                $subjects['Локални мрежи']->id,
+                $subjects['Локални мрежи'],
                 3,
                 11,
                 '6.308',
                 'every',
-                true,
-                3
+                true
             )->id,
             classSlot(
-                $subjects['Разпределени уеб приложения']->id,
+                $subjects['Разпределени уеб приложения'],
                 3,
                 14,
                 '1.407',
@@ -223,37 +270,35 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Разпределени уеб приложения']->id,
+                $subjects['Разпределени уеб приложения'],
                 3,
                 16,
                 '6.207',
                 'every',
-                true,
-                3
+                true
             )->id,
 
             classSlot(
-                $subjects['Компютърно зрение']->id,
+                $subjects['Компютърно зрение'],
                 4,
                 12,
                 '6.401',
                 'every',
-                true,
-                3
+                true
             )->id,
         ]);
         
         $schedule27A->uniClasses()->syncWithoutDetaching([
             classSlot(
-                $subjects['Информационни системи']->id,
-                1, // Monday
+                $subjects['Информационни системи'],
+                1,
                 10,
                 '2.209',
                 'even',
                 false
             )->id,
             classSlot(
-                $subjects['Езикови процесори']->id,
+                $subjects['Езикови процесори'],
                 1,
                 12,
                 '1.317',
@@ -261,7 +306,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Компютърни мрежи']->id,
+                $subjects['Компютърни мрежи'],
                 1,
                 14,
                 '1.307',
@@ -269,7 +314,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Операционни системи']->id,
+                $subjects['Операционни системи'],
                 2,
                 8,
                 '2Б.107',
@@ -277,7 +322,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Компютърни мрежи']->id,
+                $subjects['Компютърни мрежи'],
                 2,
                 10,
                 '2Г.302',
@@ -285,7 +330,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Уеб програмиране']->id,
+                $subjects['Уеб програмиране'],
                 2,
                 14,
                 '2.209',
@@ -293,7 +338,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Езикови процесори']->id,
+                $subjects['Езикови процесори'],
                 2,
                 16,
                 '6.401',
@@ -301,7 +346,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Операционни системи']->id,
+                $subjects['Операционни системи'],
                 3,
                 8,
                 '6.401',
@@ -309,7 +354,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Мултимедиини системи и технологии']->id,
+                $subjects['Мултимедиини системи и технологии'],
                 3,
                 10,
                 '2.209',
@@ -317,7 +362,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Мултимедиини системи и технологии']->id,
+                $subjects['Мултимедиини системи и технологии'],
                 3,
                 14,
                 '6.306',
@@ -325,7 +370,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Информационни системи']->id,
+                $subjects['Информационни системи'],
                 4,
                 8,
                 '6.401',
@@ -333,7 +378,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Уеб програмиране']->id,
+                $subjects['Уеб програмиране'],
                 4,
                 12,
                 '6.207',
@@ -344,7 +389,7 @@ class DatabaseSeeder extends Seeder
 
         $schedule27B->uniClasses()->syncWithoutDetaching([
             classSlot(
-                $subjects['Езикови процесори']->id,
+                $subjects['Езикови процесори'],
                 1,
                 12,
                 '1.317',
@@ -352,7 +397,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Компютърни мрежи']->id,
+                $subjects['Компютърни мрежи'],
                 1,
                 14,
                 '1.307',
@@ -360,7 +405,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Операционни системи']->id,
+                $subjects['Операционни системи'],
                 2,
                 8,
                 '2Б.107',
@@ -368,7 +413,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Уеб програмиране']->id,
+                $subjects['Уеб програмиране'],
                 2,
                 14,
                 '2.209',
@@ -376,7 +421,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Мултимедиини системи и технологии']->id,
+                $subjects['Мултимедиини системи и технологии'],
                 3,
                 10,
                 '2.209',
@@ -387,7 +432,7 @@ class DatabaseSeeder extends Seeder
 
         $schedule26A->uniClasses()->syncWithoutDetaching([
             classSlot(
-                $subjects['Информационни системи']->id,
+                $subjects['Информационни системи'],
                 1, // Monday
                 10,
                 '2.209',
@@ -395,7 +440,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Езикови процесори']->id,
+                $subjects['Езикови процесори'],
                 1,
                 12,
                 '1.317',
@@ -403,7 +448,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Компютърни мрежи']->id,
+                $subjects['Компютърни мрежи'],
                 1,
                 14,
                 '1.307',
@@ -411,7 +456,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Операционни системи']->id,
+                $subjects['Операционни системи'],
                 2,
                 8,
                 '2Б.107',
@@ -419,7 +464,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Езикови процесори']->id,
+                $subjects['Езикови процесори'],
                 2,
                 10,
                 '6.401',
@@ -427,7 +472,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Компютърни мрежи']->id,
+                $subjects['Компютърни мрежи'],
                 2,
                 12,
                 '2Г.302',
@@ -435,7 +480,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Уеб програмиране']->id,
+                $subjects['Уеб програмиране'],
                 2,
                 14,
                 '2.209',
@@ -443,7 +488,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Мултимедиини системи и технологии']->id,
+                $subjects['Мултимедиини системи и технологии'],
                 3,
                 10,
                 '2.209',
@@ -451,7 +496,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Уеб програмиране']->id,
+                $subjects['Уеб програмиране'],
                 3,
                 12,
                 '6.207',
@@ -459,7 +504,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Информационни системи']->id,
+                $subjects['Информационни системи'],
                 3,
                 14,
                 '6.401',
@@ -467,7 +512,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Операционни системи']->id,
+                $subjects['Операционни системи'],
                 4,
                 10,
                 '6.401',
@@ -475,7 +520,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Мултимедиини системи и технологии']->id,
+                $subjects['Мултимедиини системи и технологии'],
                 4,
                 12,
                 '6.208',
@@ -486,7 +531,7 @@ class DatabaseSeeder extends Seeder
 
         $schedule26B->uniClasses()->syncWithoutDetaching([
             classSlot(
-                $subjects['Информационни системи']->id,
+                $subjects['Информационни системи'],
                 1, // Monday
                 10,
                 '2.209',
@@ -494,7 +539,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Езикови процесори']->id,
+                $subjects['Езикови процесори'],
                 1,
                 12,
                 '1.317',
@@ -502,7 +547,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Компютърни мрежи']->id,
+                $subjects['Компютърни мрежи'],
                 1,
                 14,
                 '1.307',
@@ -510,7 +555,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Операционни системи']->id,
+                $subjects['Операционни системи'],
                 2,
                 8,
                 '2Б.107',
@@ -518,7 +563,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Мултимедиини системи и технологии']->id,
+                $subjects['Мултимедиини системи и технологии'],
                 2,
                 10,
                 '6.301',
@@ -526,7 +571,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Езикови процесори']->id,
+                $subjects['Езикови процесори'],
                 2,
                 12,
                 '6.401',
@@ -534,7 +579,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Уеб програмиране']->id,
+                $subjects['Уеб програмиране'],
                 2,
                 14,
                 '2.209',
@@ -542,7 +587,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Мултимедиини системи и технологии']->id,
+                $subjects['Мултимедиини системи и технологии'],
                 3,
                 10,
                 '2.209',
@@ -550,7 +595,7 @@ class DatabaseSeeder extends Seeder
                 false
             )->id,
             classSlot(
-                $subjects['Информационни системи']->id,
+                $subjects['Информационни системи'],
                 3,
                 12,
                 '6.401',
@@ -558,7 +603,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Уеб програмиране']->id,
+                $subjects['Уеб програмиране'],
                 3,
                 14,
                 '6.207',
@@ -566,7 +611,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Операционни системи']->id,
+                $subjects['Операционни системи'],
                 4,
                 12,
                 '6.401',
@@ -574,7 +619,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
             classSlot(
-                $subjects['Компютърни мрежи']->id,
+                $subjects['Компютърни мрежи'],
                 4,
                 14,
                 '2Г.302',

@@ -16,46 +16,46 @@ const WEEKS = Object.entries({
 });
 
 export default function ScheduleGrid({ apiData }) {
-  const [isSelecting, setIsSelecting] = useState(false);
-  const [selection, setSelection] = useState([]);
-  const [selectedClass, setSelectedClass] = useState(null);
+  // const [isSelecting, setIsSelecting] = useState(false);
+  // const [selection, setSelection] = useState([]);
+  // const [selectedClass, setSelectedClass] = useState(null);
 
   let daysCount = Object.keys(apiData.orderedClasses).length;
   let subgroupsCount = apiData.groupInfo.subgroups.length;
   let gridRows = 1 + (daysCount*subgroupsCount*2);
 
 
-  function cellKey(day, subgroup, week, hour) {
-    return `${day}-${subgroup}-${week}-${hour}`;
-  }
+  // function cellKey(day, subgroup, week, hour) {
+  //   return `${day}-${subgroup}-${week}-${hour}`;
+  // }
 
-  function startSelection(day, subgroup, week, hour) {
-    setIsSelecting(true);
-    setSelection([{ day, subgroup, week, hour }]);
-  }
+  // function startSelection(day, subgroup, week, hour) {
+  //   setIsSelecting(true);
+  //   setSelection([{ day, subgroup, week, hour }]);
+  // }
 
-  function extendSelection(day, subgroup, week, hour) {
-    if (!isSelecting) return;
+  // function extendSelection(day, subgroup, week, hour) {
+  //   if (!isSelecting) return;
 
-    setSelection(prev => {
-      const key = cellKey(day, subgroup, week, hour);
-      if (prev.some(c => cellKey(c.day, c.subgroup, c.week, c.hour) === key)) {
-        return prev;
-      }
-      return [...prev, { day, subgroup, week, hour }];
-    });
-  }
+  //   setSelection(prev => {
+  //     const key = cellKey(day, subgroup, week, hour);
+  //     if (prev.some(c => cellKey(c.day, c.subgroup, c.week, c.hour) === key)) {
+  //       return prev;
+  //     }
+  //     return [...prev, { day, subgroup, week, hour }];
+  //   });
+  // }
 
-  function endSelection() {
-    setIsSelecting(false);
-    console.log("Selected cells:", selection);
-  }
+  // function endSelection() {
+  //   setIsSelecting(false);
+  //   console.log("Selected cells:", selection);
+  // }
 
-  function isCellSelected(day, subgroup, week, hour) {
-    return selection.some(
-      c => c.day === day && c.subgroup === subgroup && c.week === week && c.hour === hour
-    );
-  }
+  // function isCellSelected(day, subgroup, week, hour) {
+  //   return selection.some(
+  //     c => c.day === day && c.subgroup === subgroup && c.week === week && c.hour === hour
+  //   );
+  // }
 
   function getUniClassRowSpan(uniClass, subgroups, reachedSubgroupKey) {
     if (uniClass.week == "odd")
@@ -296,14 +296,13 @@ export default function ScheduleGrid({ apiData }) {
                       return (
                         <div key={cls.id}
                           // className={`
-                          //   bg-[#cce5ff] outline outline-1 outline-[#007bff] rounded-xl cursor-pointer z-10
+                          //   bg-[#cce5ff] border border-[#00b7ff] cursor-pointer z-10
                           //   px-1 flex flex-col items-center justify-center text-center
                           //   ${selectedClass?.id === cls.id ? "outline-2 outline-[#004085]" : ""}
                           // `}
                           className={`
-                            bg-[#cce5ff] border border-[#00b7ff] cursor-pointer z-10
+                            bg-[#cce5ff] border border-[#00b7ff] z-10
                             px-1 flex flex-col items-center justify-center text-center
-                            ${selectedClass?.id === cls.id ? "outline-2 outline-[#004085]" : ""}
                           `}
                           style={{
                               gridColumnStart: cls.startHour - 3,
@@ -325,17 +324,18 @@ export default function ScheduleGrid({ apiData }) {
                       return (
                         // <div className="outline outline-1 outline-[#eee] bg-white"
                         <div 
-                          className={`border-l border-t border-[#eee] cell 
-                            ${isCellSelected(dayIndex, subgroupKey, weekText, hour) ? "bg-[#d1fad5]" : "bg-white"}
-                            hover:bg-[#c2c2c2]`}
+                          // className={`border-l border-t border-[#eee] cell 
+                          //   ${isCellSelected(dayIndex, subgroupKey, weekText, hour) ? "bg-[#d1fad5]" : "bg-white"}
+                          //   hover:bg-[#c2c2c2]`}
+                          className={`border-l border-t border-[#eee] cell`}
                           style={{
                             gridColumnStart: hourReached - 4,
                             gridRowStart: weekRowStart,
                           }}
-                          key={cellKey(dayIndex, subgroupKey, weekText, hour)}
-                          onMouseDown={() => startSelection(dayIndex, subgroupKey, weekText, hour)}
-                          onMouseEnter={() => extendSelection(dayIndex, subgroupKey, weekText, hour)}
-                          onMouseUp={() => endSelection()}
+                          // key={cellKey(dayIndex, subgroupKey, weekText, hour)}
+                          // onMouseDown={() => startSelection(dayIndex, subgroupKey, weekText, hour)}
+                          // onMouseEnter={() => extendSelection(dayIndex, subgroupKey, weekText, hour)}
+                          // onMouseUp={() => endSelection()}
                         />
                       )
                     }

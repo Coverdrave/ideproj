@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('shortened_name');
             $table->unsignedTinyInteger('study_semester');
+            $table->unsignedTinyInteger('default_duration_lecture');
+            $table->unsignedTinyInteger('default_duration_exercise');
 
             $table->foreignId('specialty_id')->constrained()->cascadeOnDelete();
 

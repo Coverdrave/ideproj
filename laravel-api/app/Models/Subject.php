@@ -12,17 +12,22 @@ class Subject extends Model
         'name',
         'shortened_name',
         'specialty_id',
-        'study_semester'
+        'study_semester',
+        'default_duration_lecture',
+        'default_duration_exercise'
     ];
 
     protected $casts = [
         'specialty_id' => 'integer',
-        'study_semester' => 'integer'
+        'study_semester' => 'integer',
+        'default_duration' => 'integer'
     ];
 
     public static $rules = [
         'specialty_id' => 'required|exists:specialties,id',
         'study_semester' => 'required|integer|min:1|max:14',
+        'default_duration_lecture' => 'required|integer|min:1',
+        'default_duration_exercise' => 'required|integer|min:1',
     ];
 
     public function specialty(): BelongsTo
