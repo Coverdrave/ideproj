@@ -283,10 +283,10 @@ class ScheduleController extends Controller
         return [
             'options' => $request->subjects_options,
             'groupInfo' => [
-                'groupNumber' => 28,
+                'groupNumber' => $request->group_number,
                 'startYear'   => 2022,
                 'academicYear'=> 2025,
-                'isWinterTerm'=> true,
+                'isWinterTerm'=> ($request->semester % 2),
                 'subgroups'   => $request->subgroups,
             ],
             'vars' => $variables,

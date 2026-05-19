@@ -5,8 +5,6 @@ import ScheduleGrid from "./ScheduleGrid.jsx";
 const semesterToTerm = (semester) => (semester % 2 === 1 ? "Зимен" : "Летен");
 const semesterToCourse = (semester) => Math.ceil(semester / 2);
 
-const SUBGROUPS = ["А", "Б"];
-
 export default function GenerateSchedule({ close }) {
   const [view, setView] = useState("options");
 
@@ -21,6 +19,14 @@ export default function GenerateSchedule({ close }) {
   const [semesterSubjects, setSemesterSubjects] = useState([]);
   const [subjectsLoading, setSubjectsLoading] = useState(false);
   const [subjectsError, setSubjectsError] = useState("");
+
+  const [studentGroups, setStudentGroups] = useState([]);
+  const [studentGroupsLoading, setStudentGroupsLoading] = useState(false);
+  const [selectedStudentGroup, setSelectedStudentGroup] = useState("");
+  const [groupsError, setGroupsError] = useState("");
+
+  const [subgroups, setSubgroups] = useState([]);
+  const [selectedSubgroups, setSelectedSubgroups] = useState([]);
 
   const [subjectOptions, setSubjectOptions] = useState({});
 
@@ -81,7 +87,33 @@ export default function GenerateSchedule({ close }) {
       }
     }
 
+    async function loadGroupsSubgroups() {
+      setStudentGroupsLoading(true);
+      setGroupsError("");
+      setStudentGroups([]);
+      setSubgroups([]);
+
+      try {
+        const res = await fetch (
+          `/api/student_group/get_groups_subgroups/${selectedSpecialtyId}/${selectedSemester}`
+        );
+        const data = await res.json();
+
+        if (res.ok) {
+          setStudentGroups(data.groups);
+          setSubgroups(data.subgroups);
+        } else {
+          setGroupsError(data.message || "Неуспешно зареждане на групите.");
+        }
+      } catch {
+        setGroupsError("Сървърът не е достъпен.");
+      } finally {
+        setStudentGroupsLoading(false);
+      }
+    }
+
     loadSubjects();
+    loadGroupsSubgroups();
   }, [selectedSpecialtyId, selectedSemester]);
 
   const selectedFaculty = useMemo(
@@ -128,6 +160,8 @@ export default function GenerateSchedule({ close }) {
 
   const canGenerate =
     Boolean(selectedSemester) &&
+    Boolean(selectedStudentGroup) &&
+    selectedSubgroups.length > 0 &&
     !subjectsLoading &&
     semesterSubjects.length > 0 &&
     !generating;
@@ -140,6 +174,8 @@ export default function GenerateSchedule({ close }) {
     setSemesterSubjects([]);
     setSubjectsError("");
     setGenerateError("");
+    setSelectedStudentGroup("");
+    setSelectedSubgroups("");
   };
 
   const handleSpecialtyChange = (event) => {
@@ -149,13 +185,22 @@ export default function GenerateSchedule({ close }) {
     setSemesterSubjects([]);
     setSubjectsError("");
     setGenerateError("");
+    setSelectedStudentGroup("");
+    setSelectedSubgroups("");
   };
 
   const handleSemesterChange = (event) => {
     setSelectedSemester(event.target.value);
     setSubjectOptions({});
     setGenerateError("");
+    setSelectedStudentGroup("");
+    setSelectedSubgroups("");
   };
+
+  const handleGroupChange = (event) => {
+    setSelectedStudentGroup(event.target.value);
+    setSelectedSubgroups(subgroups);
+  }
 
   const updateEveryWeek = (subjectId, type, value) => {
     setSubjectOptions((prev) => ({
@@ -190,7 +235,9 @@ export default function GenerateSchedule({ close }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          subgroups: SUBGROUPS,
+          group_number: selectedStudentGroup,
+          subgroups: selectedSubgroups,
+          semester: selectedSemester,
           subjects_options: normalizedSubjectOptions,
         }),
       });
@@ -288,6 +335,67 @@ export default function GenerateSchedule({ close }) {
             </select>
           </div>
         </div>
+
+        {groupsError ? (
+          <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {groupsError}
+          </p>
+        ) : (
+          <div className="mt-2 grid gap-3 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Група
+              </label>
+              <select
+                value={selectedStudentGroup}
+                onChange={handleGroupChange}
+                disabled={!selectedSemester || studentGroupsLoading}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              >
+                <option value="">{studentGroupsLoading ? "Зареждане..." : "Избери група"}</option>
+                {studentGroups.map((groupNumber) => (
+                  <option key={groupNumber} value={groupNumber}>
+                    {groupNumber}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Подгрупи
+              </label>
+              <div className="flex gap-2">
+                {!selectedStudentGroup ? (
+                  <p className="mt-1 text-gray-500">Избери група</p>
+                ) : (
+                  subgroups.map((subgroup) => {
+                  const isSelected = selectedSubgroups.includes(subgroup);
+
+                  return (
+                    <button
+                      key={subgroup}
+                      type="button"
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedSubgroups(selectedSubgroups.filter((s) => s !== subgroup));
+                        } else {
+                          setSelectedSubgroups([...selectedSubgroups, subgroup]);
+                        }
+                      }}
+                      className={`rounded-md border px-4 py-2 text-sm font-medium transition ${
+                        isSelected
+                          ? "border-blue-600 bg-blue-600 text-white shadow-sm"
+                          : "border-slate-300 bg-white text-slate-700 hover:border-blue-400 hover:bg-blue-50"
+                      }`}
+                    >
+                      {subgroup}
+                    </button>
+                  );
+                }))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -297,7 +405,7 @@ export default function GenerateSchedule({ close }) {
           </h3>
           {selectedSemester && !subjectsLoading && (
             <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-              {semesterSubjects.length} предмет(а)
+              {semesterSubjects.length} предмет{(semesterSubjects.length > 1) && "а"}
             </span>
           )}
         </div>
