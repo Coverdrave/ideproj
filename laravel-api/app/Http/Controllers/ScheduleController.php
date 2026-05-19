@@ -21,23 +21,16 @@ class ScheduleController extends Controller
 
     public function index(Request $request) {
         $validated = $request->validate([
-            'group_number'  => 'required|integer',
-            'start_year'    => 'required|integer',
-            'academic_year' => 'required|integer',
-            'is_winter_term'=> 'required|boolean',
+            'group_number' => 'required|exists:student_groups,group_number',
+            'semester' => 'required|integer|min:1'
         ]);
 
-        $studentGroups = StudentGroup::where([
-            'group_number' => $validated['group_number'],
-            'start_year'   => $validated['start_year'],
-        ])->orderBy('subgroup')->get();
+        $studentGroup = StudentGroup::where(
+            'group_number', $validated['group_number']
+        )->firstOrFail();
 
-        $schedules = Schedule::whereIn(
-                'student_group_id',
-                $studentGroups->pluck('id')
-            )
-            ->where('academic_year', $validated['academic_year'])
-            ->where('is_winter_term', $validated['is_winter_term'])
+        $schedules = Schedule::where('student_group_id', $studentGroup->id)
+            ->where('semester', $validated['semester'])
             ->with(['uniClasses' => function ($q) {
                 $q->orderBy('day')
                 ->orderByRaw("
@@ -49,12 +42,12 @@ class ScheduleController extends Controller
                 ")
                   ->orderBy('start_hour');
             }])
-            ->get();
+        ->get();
 
         $rows = [];
 
         $days = range(1, 6);
-        $subgroups = $studentGroups->pluck('subgroup');
+        $subgroups = $schedules->pluck('subgroup')->sort();
 
         foreach ($days as $day) {
             foreach ($subgroups as $subgroup) {
@@ -64,7 +57,7 @@ class ScheduleController extends Controller
 
         foreach ($schedules as $schedule) {
             foreach ($schedule->uniClasses as $class) {
-                $rows[$class->day][$schedule->studentGroup->subgroup][] = [
+                $rows[$class->day][$schedule->subgroup][] = [
                     'id'          => $class->id,
                     'week'        => $class->week, // odd | even | every
                     'day'         => $class->day,
@@ -78,33 +71,25 @@ class ScheduleController extends Controller
         }
 
         return [
-            'groupInfo' => [
+            'info' => [
                 'groupNumber' => $validated['group_number'],
-                'startYear'   => $validated['start_year'],
-                'academicYear'=> $validated['academic_year'],
-                'isWinterTerm'=> $validated['is_winter_term'],
-                'subgroups'   => $subgroups,
+                'semester' => $validated['semester'],
+                'subgroups' => $subgroups,
             ],
             'orderedClasses' => $rows
         ];
     }
 
     public function all() {
-        $schedules = Schedule::query()
-            ->join('student_groups', 'student_groups.id', '=', 'schedules.student_group_id')
-            ->select(
-                'student_groups.group_number as groupNumber',
-                'student_groups.start_year as startYear',
-                'schedules.academic_year as academicYear',
-                'schedules.is_winter_term as isWinterTerm'
-            )
-            ->distinct()
-            ->orderBy('student_groups.group_number')
-            ->orderBy('schedules.academic_year')
-            ->orderBy('schedules.is_winter_term', 'desc')
-            ->get();
+        $schedules = Schedule::with('studentGroup.specialty')->get();
 
-        return $schedules;
+        return $schedules->map(function ($schedule) {
+            return [
+                'groupNumber'   => $schedule->studentGroup->group_number ?? null,
+                'semester'      => $schedule->semester,
+                'specialtyName' => $schedule->studentGroup->specialty->short_name ?? null,
+            ];
+        })->unique()->values();
     }
 
     public function create(Request $request) {
@@ -282,12 +267,10 @@ class ScheduleController extends Controller
 
         return [
             'options' => $request->subjects_options,
-            'groupInfo' => [
+            'info' => [
                 'groupNumber' => $request->group_number,
-                'startYear'   => 2022,
-                'academicYear'=> 2025,
-                'isWinterTerm'=> ($request->semester % 2),
-                'subgroups'   => $request->subgroups,
+                'subgroups' => $request->subgroups,
+                'semester' => $request->semester
             ],
             'vars' => $variables,
             'b' => $b,

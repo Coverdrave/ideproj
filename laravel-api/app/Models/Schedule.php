@@ -8,12 +8,18 @@ class Schedule extends Model
 {
     protected $fillable = [
         'student_group_id',
-        'academic_year',
-        'is_winter_term'
+        'subgroup',
+        'semester'
     ];
 
     protected $casts = [
-        'is_winter_term' => 'boolean',
+        'semester' => 'integer',
+    ];
+
+    public static $rules = [
+        'student_group_id' => 'required|exists:student_groups,id',
+        'subgroup' => 'required|string|size:1|regex:/^[А-Я]$/u',
+        'semester' => 'required|integer|min:1'
     ];
 
     public function studentGroup()

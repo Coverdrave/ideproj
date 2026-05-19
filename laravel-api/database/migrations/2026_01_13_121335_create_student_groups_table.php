@@ -13,18 +13,13 @@ return new class extends Migration
     {
         Schema::create('student_groups', function (Blueprint $table) {
             $table->id();
-
             $table->smallInteger('group_number');
-            $table->char('subgroup', 1); // A, B, C...
-            $table->year('start_year');
-
             $table->foreignId('specialty_id')
                 ->constrained('specialties')
                 ->cascadeOnDelete();
 
             $table->timestamps();
-
-            $table->unique(['group_number', 'subgroup', 'start_year']);
+            $table->unique(['group_number']);
         });
     }
 

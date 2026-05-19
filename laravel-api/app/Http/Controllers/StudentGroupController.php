@@ -10,8 +10,10 @@ class StudentGroupController extends Controller
 {
     public function get_groups_subgroups(int $specialtyId, int $semester) {
         $result = StudentGroup::where('specialty_id', $specialtyId)
-            ->where('start_year', (int)Date("Y") - (int)round($semester / 2, 0, PHP_ROUND_HALF_UP))
-            ->get(['id', 'group_number', 'subgroup']);
+            ->with(['schedules' => function($query) use ($semester) {
+                $query->where('semester', $semester);
+            }])
+            ->get();
         
         if ($result->isEmpty()) {
             return response()->json([
@@ -21,7 +23,9 @@ class StudentGroupController extends Controller
 
         return [
             'groups' => $result->pluck('group_number')->unique()->sort()->values(),
-            'subgroups' => $result->pluck('subgroup')->unique()->sort()->values()
+            'subgroups' => $result->flatMap(function ($group) {
+                return $group->schedules->pluck('subgroup');
+            })->unique()->sort()->values()
         ];
     }
 }

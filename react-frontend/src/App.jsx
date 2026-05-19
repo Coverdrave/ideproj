@@ -14,9 +14,7 @@ export default function App() {
   const [apiData, setApiData] = useState([]);
 
   const [groupNumber, setGroupNumber] = useState("27");
-  const [startYear, setStartYear] = useState("2022");
-  const [academicYear, setAcademicYear] = useState("2025");
-  const [isWinterTerm, setIsWinterTerm] = useState(false);
+  const [semester, setSemester] = useState(7);
 
   const [openModal, setOpenModal] = useState(null);
   const open = (modalName) => setOpenModal(modalName);
@@ -27,9 +25,7 @@ export default function App() {
       "/api/schedule?" +
         new URLSearchParams({
           group_number: groupNumber,
-          start_year: startYear,
-          academic_year: academicYear,
-          is_winter_term: isWinterTerm ? 1 : 0,
+          semester: semester
         }).toString()
     );
     
@@ -40,11 +36,9 @@ export default function App() {
     }
   }
 
-  function updateData(groupNumber, startYear, academicYear, isWinterTerm) {
+  function updateData(groupNumber, semester) {
     setGroupNumber(groupNumber);
-    setStartYear(startYear);
-    setAcademicYear(academicYear);
-    setIsWinterTerm(isWinterTerm == 1 ? true : false);
+    setSemester(semester);
   }
 
   useEffect(() => {
@@ -53,7 +47,7 @@ export default function App() {
 
   useEffect(() => {
     getApiData();
-  }, [groupNumber, startYear, academicYear, isWinterTerm]);
+  }, [groupNumber, semester]);
 
   return (
     <>
@@ -92,7 +86,7 @@ export default function App() {
           </div>
         </div>
 
-        {apiData && apiData.groupInfo ? (
+        {apiData && apiData.info ? (
           <div className="max-w-min min-w-max mx-auto">
             <ScheduleGrid apiData={apiData} />
           </div>

@@ -8,8 +8,7 @@ class StudentGroup extends Model
 {
     protected $fillable = [
         'group_number',
-        'subgroup',
-        'start_year'
+        'specialty_id'
     ];
 
     public function schedules()

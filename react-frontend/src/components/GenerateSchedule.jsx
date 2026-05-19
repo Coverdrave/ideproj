@@ -369,28 +369,28 @@ export default function GenerateSchedule({ close }) {
                   <p className="mt-1 text-gray-500">Избери група</p>
                 ) : (
                   subgroups.map((subgroup) => {
-                  const isSelected = selectedSubgroups.includes(subgroup);
+                    const isSelected = selectedSubgroups.includes(subgroup);
 
-                  return (
-                    <button
-                      key={subgroup}
-                      type="button"
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedSubgroups(selectedSubgroups.filter((s) => s !== subgroup));
-                        } else {
-                          setSelectedSubgroups([...selectedSubgroups, subgroup]);
-                        }
-                      }}
-                      className={`rounded-md border px-4 py-2 text-sm font-medium transition ${
-                        isSelected
-                          ? "border-blue-600 bg-blue-600 text-white shadow-sm"
-                          : "border-slate-300 bg-white text-slate-700 hover:border-blue-400 hover:bg-blue-50"
-                      }`}
-                    >
-                      {subgroup}
-                    </button>
-                  );
+                    return (
+                      <button
+                        key={subgroup}
+                        type="button"
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedSubgroups(selectedSubgroups.filter((s) => s !== subgroup));
+                          } else {
+                            setSelectedSubgroups([...selectedSubgroups, subgroup]);
+                          }
+                        }}
+                        className={`rounded-md border px-4 py-2 text-sm font-medium transition ${
+                          isSelected
+                            ? "border-blue-600 bg-blue-600 text-white shadow-sm"
+                            : "border-slate-300 bg-white text-slate-700 hover:border-blue-400 hover:bg-blue-50"
+                        }`}
+                      >
+                        {subgroup}
+                      </button>
+                    );
                 }))}
               </div>
             </div>

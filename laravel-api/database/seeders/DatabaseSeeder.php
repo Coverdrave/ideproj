@@ -171,23 +171,21 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $groups = collect([
-            ['group_number' => 27, 'subgroup' => 'А', 'start_year' => 2022, 'specialty_id' => $specialties['КСТ']->id],
-            ['group_number' => 27, 'subgroup' => 'Б', 'start_year' => 2022, 'specialty_id' => $specialties['КСТ']->id],
-            ['group_number' => 26, 'subgroup' => 'А', 'start_year' => 2022, 'specialty_id' => $specialties['КСТ']->id],
-            ['group_number' => 26, 'subgroup' => 'Б', 'start_year' => 2022, 'specialty_id' => $specialties['КСТ']->id],
+            ['group_number' => 26, 'specialty_id' => $specialties['КСТ']->id],
+            ['group_number' => 27, 'specialty_id' => $specialties['КСТ']->id],
         ])->mapWithKeys(function ($data) {
             return [
-                "{$data['group_number']}{$data['subgroup']}" =>
+                "{$data['group_number']}" =>
                     \App\Models\StudentGroup::firstOrCreate($data)
             ];
         });
 
-        function makeSchedule($group, $year, $isWinter)
+        function makeSchedule($group, $subgroup, $semester)
         {
             return Schedule::firstOrCreate([
                 'student_group_id' => $group->id,
-                'academic_year' => $year,
-                'is_winter_term' => $isWinter,
+                'subgroup' => $subgroup,
+                'semester' => $semester,
             ]);
         }
 
@@ -212,11 +210,11 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        $schedule27A = makeSchedule($groups['27А'], 2025, true);
-        $schedule27B = makeSchedule($groups['27Б'], 2025, true);
-        $schedule27ASummer = makeSchedule($groups['27А'], 2025, false);
-        $schedule26A = makeSchedule($groups['26А'], 2025, true);
-        $schedule26B = makeSchedule($groups['26Б'], 2025, true);
+        $schedule26A = makeSchedule($groups['26'], 'А', 7);
+        $schedule26B = makeSchedule($groups['26'], 'Б', 7);
+        $schedule27A = makeSchedule($groups['27'], 'А', 7);
+        $schedule27B = makeSchedule($groups['27'], 'Б', 7);
+        $schedule27ASummer = makeSchedule($groups['27'], 'А', 8);
 
         $schedule27ASummer->uniClasses()->syncWithoutDetaching([
             classSlot(

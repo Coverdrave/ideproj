@@ -14,22 +14,18 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('student_group_id')
                 ->constrained()
                 ->cascadeOnDelete();
-
-            $table->year('academic_year');
-            $table->boolean('is_winter_term');
+            $table->char('subgroup', 1);
+            $table->unsignedTinyInteger('semester');
 
             $table->timestamps();
-
             $table->unique([
                 'student_group_id',
-                'academic_year',
-                'is_winter_term'
+                'subgroup',
+                'semester'
             ]);
-
             $table->index('student_group_id');
         });
     }

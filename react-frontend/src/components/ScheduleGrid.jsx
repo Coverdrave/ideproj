@@ -21,8 +21,10 @@ export default function ScheduleGrid({ apiData }) {
   // const [selectedClass, setSelectedClass] = useState(null);
 
   let daysCount = Object.keys(apiData.orderedClasses).length;
-  let subgroupsCount = apiData.groupInfo.subgroups.length;
-  let gridRows = 1 + (daysCount*subgroupsCount*2);
+  let subgroupsCount = apiData.info.subgroups.length;
+  let weeksCount = WEEKS.length;
+  let rowsForDay = subgroupsCount * weeksCount;
+  let gridRows = 1 + (daysCount * rowsForDay);
 
 
   // function cellKey(day, subgroup, week, hour) {
@@ -118,12 +120,12 @@ export default function ScheduleGrid({ apiData }) {
   return (<>
     <div className="grid grid-flow-col font-bold">
       <p className="text-start">
-        КУРС: {apiData.groupInfo.academicYear - apiData.groupInfo.startYear + 1} &emsp; 
-        ГРУПА: {apiData.groupInfo.groupNumber}
+        КУРС: {Math.round(apiData.info.semester / 2)} &emsp; 
+        ГРУПА: {apiData.info.groupNumber}
       </p>
       <p className="text-end">
-        {apiData.groupInfo.isWinterTerm == 1 ? "ЗИМЕН" : "ЛЕТЕН"} СЕМЕСТЪР
-        &emsp; {apiData.groupInfo.academicYear}/{parseInt(apiData.groupInfo.academicYear) + 1}г.
+        {apiData.info.semester % 2 ? "ЗИМЕН" : "ЛЕТЕН"} СЕМЕСТЪР
+        {/* &emsp; {apiData.groupInfo.academicYear}/{parseInt(apiData.groupInfo.academicYear) + 1}г. */}
       </p>
     </div>
     
@@ -182,8 +184,8 @@ export default function ScheduleGrid({ apiData }) {
         const skipHours = {};
         let subgroups = Object.entries(subgroupsObj);
         let subgroupReachedStyle = 0;
-        let dayRowStart = (parseInt(dayIndex)*4 - 3) + 1;
-        let dayRowEnd = dayRowStart + (subgroupsCount*2)
+        let dayRowStart = ((parseInt(dayIndex)*rowsForDay) - (rowsForDay-1)) + 1;
+        let dayRowEnd = dayRowStart + rowsForDay;
         let weekRowStart = dayRowStart-1;
 
         return (<>

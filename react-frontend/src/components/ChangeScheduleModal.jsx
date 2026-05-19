@@ -26,12 +26,15 @@ export default function ChangeScheduleModal({ close, updateData }) {
       >
         <div className="grid mb-1"
           style={{
-            gridTemplateColumns: `repeat(3, auto)`,
+            gridTemplateColumns: `repeat(4, auto)`,
             gridTemplateRows: `auto`
           }}
         >
           <div className="px-1">
             Група
+          </div>
+          <div className="px-1">
+            Специалност
           </div>
           <div className="px-1">
             Курс
@@ -50,15 +53,13 @@ export default function ChangeScheduleModal({ close, updateData }) {
             <div className="grid cursor-pointer transition duration-300 ease-in-out
               bg-slate-50 shadow-md rounded hover:bg-slate-100 hover:shadow-inner"
               style={{
-                gridTemplateColumns: `repeat(3, auto)`,
+                gridTemplateColumns: `repeat(4, auto)`,
                 gridTemplateRows: `auto`
               }}
               onClick={() => {
                 updateData(
                   schedule.groupNumber,
-                  schedule.startYear,
-                  schedule.academicYear,
-                  schedule.isWinterTerm
+                  schedule.semester
                 );
                 close();
               }}
@@ -67,10 +68,13 @@ export default function ChangeScheduleModal({ close, updateData }) {
                 {schedule.groupNumber}
               </div>
               <div className="px-1 text-center">
-                {schedule.academicYear - schedule.startYear + 1}
+                {schedule.specialtyName}
               </div>
               <div className="px-1 text-center">
-                {(schedule.isWinterTerm) ? 'Зимен' : 'Летен'}
+                {Math.round(schedule.semester / 2)}
+              </div>
+              <div className="px-1 text-center">
+                {(schedule.semester % 2) ? 'Зимен' : 'Летен'}
               </div>
             </div>
           </div>

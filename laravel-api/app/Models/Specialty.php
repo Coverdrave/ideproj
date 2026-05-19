@@ -24,7 +24,7 @@ class Specialty extends Model
 
     public static $rules = [
         'faculty_id' => 'required|exists:faculties,id',
-        'duration_semester' => 'required|integer|min:1|max:14',
+        'duration_semester' => 'required|integer|min:1',
         'degree_level' => 'required|in:bachelor,master,phd'
     ];
 
