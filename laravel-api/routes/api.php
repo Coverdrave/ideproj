@@ -23,6 +23,7 @@ Route::get('/schedule', [ScheduleController::class, 'index']);
 Route::get('/schedule/all', [ScheduleController::class, 'all']);
 Route::post('/schedule/create', [ScheduleController::class, 'create']);
 Route::post('/schedule/generate', [ScheduleController::class, 'generate']);
+Route::post('/schedule/save_generated', [ScheduleController::class, 'save_generated']);
 
 Route::get('/subject/all', [SubjectController::class, 'all']);
 Route::post('/subject/create', [SubjectController::class, 'create']);

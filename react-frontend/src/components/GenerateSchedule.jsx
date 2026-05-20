@@ -5,7 +5,7 @@ import ScheduleGrid from "./ScheduleGrid.jsx";
 const semesterToTerm = (semester) => (semester % 2 === 1 ? "Зимен" : "Летен");
 const semesterToCourse = (semester) => Math.ceil(semester / 2);
 
-export default function GenerateSchedule({ close }) {
+export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
   const [view, setView] = useState("options");
 
   const [faculties, setFaculties] = useState([]);
@@ -249,7 +249,7 @@ export default function GenerateSchedule({ close }) {
         return;
       }
 
-      if (!data.b || !data.orderedClasses || Object.keys(data.orderedClasses).length === 0) {
+      if (!data.generated || !data.orderedClasses || Object.keys(data.orderedClasses).length === 0) {
         setGenerateError(
           "Не бе намерено валидно разписание с текущите настройки. Опитайте да промените опциите."
         );
@@ -264,6 +264,33 @@ export default function GenerateSchedule({ close }) {
       setGenerating(false);
     }
   }
+
+  async function handleSaveGenerated() {
+    try {
+      const res = await fetch("/api/schedule/save_generated", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          group_number: generatedData?.info?.groupNumber,
+          semester: generatedData?.info?.semester,
+          subgroups: generatedData?.info.subgroups,
+          generated: generatedData?.generated,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // alert(data.message);
+        updateMainMenuData(generatedData?.info?.groupNumber, generatedData?.info?.semester);
+        closeModal();
+      }
+    } catch {
+      // setGenerateError("Сървърът не е достъпен.");
+    } finally {
+      // setGenerating(false);
+    }
+  };
 
   const optionsBody = (
     <div className="w-[min(95vw,1100px)] max-h-[min(85vh,calc(100vh-4rem))] overflow-y-auto p-3">
@@ -530,13 +557,24 @@ export default function GenerateSchedule({ close }) {
 
   const resultBody = (
     <div className="flex w-min max-h-[min(85vh,calc(100vh-4rem))] flex-col p-3">
-      <button
-        type="button"
-        onClick={handleBackToOptions}
-        className="mb-3 w-fit shrink-0 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-800"
-      >
-        ← Назад към настройките
-      </button>
+      <div className="flex justify-between">
+        <button
+          type="button"
+          onClick={handleBackToOptions}
+          className="mb-3 w-fit shrink-0 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-800"
+        >
+          ← Назад към настройките
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSaveGenerated}
+          className="mb-3 w-fit shrink-0 rounded-md bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed"
+        >
+          Запази програма
+        </button>
+      </div>
+      
 
       <div className="min-h-0 flex-1 overflow-auto rounded-lg border border-slate-200 bg-white p-2 shadow-inner">
         <div className="inline-block min-w-max pb-2">
@@ -550,5 +588,5 @@ export default function GenerateSchedule({ close }) {
   const headerText =
     view === "result" ? "Генерирана програма" : "Генериране на програма";
 
-  return <PopupModal close={close} headerText={headerText} body={body} />;
+  return <PopupModal close={closeModal} headerText={headerText} body={body} />;
 }

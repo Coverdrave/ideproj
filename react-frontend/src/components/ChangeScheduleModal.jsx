@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PopupModal from "./_PopupModal.jsx";
 
-export default function ChangeScheduleModal({ close, updateData }) {
+export default function ChangeScheduleModal({ closeModal, updateMainMenuData }) {
   const [allSchedules, setAllSchedules] = useState([]);
 
   async function getAllSchedules() {
@@ -57,11 +57,11 @@ export default function ChangeScheduleModal({ close, updateData }) {
                 gridTemplateRows: `auto`
               }}
               onClick={() => {
-                updateData(
+                updateMainMenuData(
                   schedule.groupNumber,
                   schedule.semester
                 );
-                close();
+                closeModal();
               }}
             >
               <div className="px-1 text-center">
@@ -82,5 +82,5 @@ export default function ChangeScheduleModal({ close, updateData }) {
       </div>
   )
 
-  return <PopupModal close={close} headerText={'Избери група'} body={body}/>;
+  return <PopupModal close={closeModal} headerText={'Избери група'} body={body}/>;
 }

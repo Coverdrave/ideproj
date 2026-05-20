@@ -130,6 +130,49 @@ class ScheduleController extends Controller
     //     ], 201);
     }
 
+    public function save_generated(Request $request) {
+        $validated = $request->validate([
+            'group_number' => 'required|exists:student_groups,group_number',
+            'semester' => 'required|integer|min:1',
+            'subgroups'   => 'required|array|min:1',
+            'subgroups.*' => 'required|string|size:1|regex:/^[А-Я]$/u',
+            'generated' => 'required|array'
+        ]);
+
+        $schedules = Schedule::whereHas('studentGroup', function($query) use ($validated) {
+                $query->where('group_number', $validated['group_number']);
+            })
+            ->where('semester', $validated['semester'])
+            ->whereIn('subgroup', $validated['subgroups'])
+            ->get()
+        ->keyBy('subgroup');
+
+        foreach ($schedules as $schedule) {
+            $schedule->uniClasses()->detach();
+        }
+        
+        foreach ($validated["generated"] as $key => $details) {
+            [$subgroup, $subject_id, $lect_or_exer] = explode("_", $key);
+
+            //for this to work properly, generated needs to take into account existing classes
+            $uniClass = UniClass::firstOrCreate([
+                'subject_id' => (int)$subject_id,
+                'lecturer_id' => $details["lecturer_id"],
+                'start_hour' => $details["hour"],
+                'duration' => $details["duration"],
+                'day' => $details["day"],
+                'week' => $details["week"],
+                'is_exercise' => ($lect_or_exer == "exercise") ? 1 : 0,
+                'room' => '123'
+            ]);
+
+            $schedules[$subgroup]->uniClasses()->syncWithoutDetaching($uniClass->id);
+        }
+        return response()->json([
+            'message' => 'Учебните часове бяха записани успешно!'
+        ], 201);
+    }
+
     public function generate(Request $request) {
         $variables = [];
         $domains = [];
@@ -144,72 +187,6 @@ class ScheduleController extends Controller
                 'every'
             ]
         ];
-
-        // $constraints = [];
-
-        /*
-        structure
-        subgroups: {},
-        subjects_options: {
-            subjectid: {
-                lecture: {
-                    every_week: true/false,
-                },
-                exercise: {
-                    every_week: true/false,
-                }
-            
-            }
-        }
-        */
-
-
-        // interwoven variables
-
-        // foreach ($request->subgroups as $subgroup) {
-        //     foreach ($request->subjects_options as $subject_id => $subject) {
-        //         $variables[] = $var_lect = $subgroup.'_'.$subject_id.'_'.'lecture';
-        //         $variables[] = $var_exer = $subgroup.'_'.$subject_id.'_'.'exercise';
-
-        //         $lect_week = $subject["lecture"]["every_week"];
-        //         $exer_week = $subject["exercise"]["every_week"];
-
-        //         if ($lect_week == $exer_week) {
-        //             foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
-        //                 $domains[$var_lect][] = [
-        //                     'day' => $day,
-        //                     'hour' => $hour,
-        //                     'week' => $week
-        //                 ];
-        //                 $domains[$var_exer][] = [
-        //                     'day' => $day,
-        //                     'hour' => $hour,
-        //                     'week' => $week
-        //                 ];
-        //             }
-        //         }
-        //         else {
-        //             foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week]]) as [$day, $hour, $week]) {
-        //                 $domains[$var_lect][] = [
-        //                     'day' => $day,
-        //                     'hour' => $hour,
-        //                     'week' => $week
-        //                 ];
-        //             }
-        //             foreach ($this->cartesian_product([$days, $hours, $weeks[$exer_week]]) as [$day, $hour, $week]) {
-        //                 $domains[$var_exer][] = [
-        //                     'day' => $day,
-        //                     'hour' => $hour,
-        //                     'week' => $week
-        //                 ];
-        //             }
-        //         }
-        //     }
-        // }
-
-
-        // lectures first, exercises last
-        // also subgroups grouped
         
         foreach ($request->subjects_options as $subject_id => $subject_options) {
             $lect_week = $subject_options["lecture"]["every_week"];
@@ -257,24 +234,19 @@ class ScheduleController extends Controller
             }
         }
 
-        // dd($variables, $domains);
-
         $csp = new ConstraintSatisfaction($variables, $domains);
-        // $b = $csp->backtracking_search();
-        $b = $csp->solve();
-
-        // dd($b);
+        $generated = $csp->solve();
 
         return [
-            'options' => $request->subjects_options,
+            // 'options' => $request->subjects_options,
             'info' => [
                 'groupNumber' => $request->group_number,
                 'subgroups' => $request->subgroups,
                 'semester' => $request->semester
             ],
-            'vars' => $variables,
-            'b' => $b,
-            'orderedClasses' => $this->format_generate_for_schedule_grid($b, $request->subgroups, $days),
+            // 'vars' => $variables,
+            'generated' => $generated,
+            'orderedClasses' => $this->format_generate_for_schedule_grid($generated, $request->subgroups, $days),
         ];
     }
 
