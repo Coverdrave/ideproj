@@ -98,7 +98,7 @@ class ConstraintSatisfaction {
     }
 
     // Helper for Value Ordering: returns distance to the closest class already scheduled
-    private function getGapCost($var, $val, $assignment): int {
+    private function getGapCost(string $var, array $val, array $assignment): int {
         $subgroup = explode("_", $var)[0];
         $costs = [99]; 
         foreach ($assignment as $aVar => $aVal) {
@@ -109,12 +109,13 @@ class ConstraintSatisfaction {
         return min($costs);
     }
 
-    private function hard_constraints($var1, $assignment) : bool {
+    private function hard_constraints(string $var1, array $assignment) : bool {
         [$var1_subgroup, $var1_subjectid, $var1_lect_or_exer] = explode("_", $var1);
         $var1_val = $assignment[$var1];
         $var1_day = $var1_val['day'];
         $var1_hour = $var1_val['hour'];
         $var1_week = $var1_val['week'];
+        $var1_duration = $var1_val['duration'];
         $var1_lecturer = $var1_val['lecturer_id'];
 
         foreach ($assignment as $var2 => $var2_val) {
@@ -124,11 +125,12 @@ class ConstraintSatisfaction {
             $var2_day = $var2_val['day'];
             $var2_hour = $var2_val['hour'];
             $var2_week = $var2_val['week'];
+            $var2_duration = $var2_val['duration'];
             $var2_lecturer = $var2_val['lecturer_id'];
 
             $same_time = ($var1_day == $var2_day &&
                 $this->weeksOverlap($var1_week, $var2_week) &&
-                $this->durationOverlap($var1_hour, $var1_val['duration'], $var2_hour, $var2_val['duration']));
+                $this->durationOverlap($var1_hour, $var1_duration, $var2_hour, $var2_duration));
 
             // If same subject and they're both lectures
             if ($var1_subjectid === $var2_subjectid &&

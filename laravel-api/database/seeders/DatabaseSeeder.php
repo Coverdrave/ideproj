@@ -216,7 +216,7 @@ class DatabaseSeeder extends Seeder
         $schedule27B = makeSchedule($groups['27'], 'Б', 7);
         $schedule27ASummer = makeSchedule($groups['27'], 'А', 8);
 
-        // /*
+        /*
         $schedule27ASummer->uniClasses()->syncWithoutDetaching([
             classSlot(
                 $subjects['Локални мрежи'],
@@ -626,7 +626,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
         ]);
-        // */
+        */
     }
         
 }
