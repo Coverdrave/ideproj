@@ -23,11 +23,17 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
   const [studentGroups, setStudentGroups] = useState([]);
   const [studentGroupsLoading, setStudentGroupsLoading] = useState(false);
   const [selectedStudentGroup, setSelectedStudentGroup] = useState("");
+  const [selectedSubgroups, setSelectedSubgroups] = useState([]);
   const [groupsError, setGroupsError] = useState("");
 
-  const [subgroups, setSubgroups] = useState([]);
-  const [selectedSubgroups, setSelectedSubgroups] = useState([]);
-
+  const [classesExistOtherGroupsSubgroups, setClassesExistOtherGroupsSubgroups] = useState(false);
+  const [classesExistSelectedSubgroups, setClassesExistSelectedSubgroups] = useState(false);
+  const [existingLectures, setExistingLectures] = useState([]);
+  const [existingExercises, setExistingExercises] = useState([]);
+  const [warningDialogKeepExisting, setWarningDialogKeepExisting] = useState();
+  const [overrideConfirm, setOverrideConfirm] = useState(false);
+  const [warningsError, setWarningsError] = useState("");
+  
   const [subjectOptions, setSubjectOptions] = useState({});
 
   const [generating, setGenerating] = useState(false);
@@ -64,6 +70,74 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
       return;
     }
 
+    async function loadGroupsSubgroups() {
+      setStudentGroupsLoading(true);
+      setGroupsError("");
+      setStudentGroups([]);
+
+      try {
+        const res = await fetch (
+          `/api/student_group/get_groups_subgroups/${selectedSpecialtyId}/${selectedSemester}`
+        );
+        const data = await res.json();
+
+        if (res.ok) {
+          setStudentGroups(data.groups);
+        } else {
+          setGroupsError(data.message || "Неуспешно зареждане на групите.");
+        }
+      } catch {
+        setGroupsError("Сървърът не е достъпен.");
+      } finally {
+        setStudentGroupsLoading(false);
+      }
+    }
+
+    loadGroupsSubgroups();
+  }, [selectedSpecialtyId, selectedSemester]);
+
+  useEffect(() => {
+    if (selectedSubgroups.length < 1) {
+      return;
+    }
+
+    async function loadWarningData() {
+      try {
+        const res = await fetch("/api/schedule/get_existing_subgroups", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            specialty_id: selectedSpecialtyId,
+            semester: selectedSemester,
+            group_number: selectedStudentGroup,
+            selected_subgroups: selectedSubgroups
+          }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          setClassesExistOtherGroupsSubgroups(data.othersHaveClasses);
+          setClassesExistSelectedSubgroups(data.selectedHaveClasses);
+          setExistingLectures(data.existingLectures);
+          setExistingExercises(data.existingExercises);
+        } else {
+          setWarningsError(data.message || "Неуспешно зареждане на данни.");
+        }
+      } catch {
+        setWarningsError("Сървърът не е достъпен.");
+      }
+    }
+
+    loadWarningData();
+  }, [selectedSubgroups])
+
+  useEffect(() => {
+    if (!selectedStudentGroup || !warningsAcknowledged || semesterSubjects.length > 0) {
+      return;
+    }
+
     async function loadSubjects() {
       setSubjectsLoading(true);
       setSubjectsError("");
@@ -87,34 +161,8 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
       }
     }
 
-    async function loadGroupsSubgroups() {
-      setStudentGroupsLoading(true);
-      setGroupsError("");
-      setStudentGroups([]);
-      setSubgroups([]);
-
-      try {
-        const res = await fetch (
-          `/api/student_group/get_groups_subgroups/${selectedSpecialtyId}/${selectedSemester}`
-        );
-        const data = await res.json();
-
-        if (res.ok) {
-          setStudentGroups(data.groups);
-          setSubgroups(data.subgroups);
-        } else {
-          setGroupsError(data.message || "Неуспешно зареждане на групите.");
-        }
-      } catch {
-        setGroupsError("Сървърът не е достъпен.");
-      } finally {
-        setStudentGroupsLoading(false);
-      }
-    }
-
     loadSubjects();
-    loadGroupsSubgroups();
-  }, [selectedSpecialtyId, selectedSemester]);
+  }, [selectedStudentGroup, warningDialogKeepExisting, overrideConfirm]);
 
   const selectedFaculty = useMemo(
     () => faculties.find((f) => f.id === Number(selectedFacultyId)) ?? null,
@@ -144,7 +192,9 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
 
     semesterSubjects.forEach((subject) => {
       nextOptions[subject.id] = {
-        lecture: {
+        lecture: (warningDialogKeepExisting === true && existingLectures[subject.id]) ? {
+          use_existing: existingLectures[subject.id]
+        } : {
           every_week: subjectOptions[subject.id]?.lecture?.every_week ?? true,
           duration: subject.default_duration_lecture
         },
@@ -156,12 +206,17 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
     });
 
     return nextOptions;
-  }, [semesterSubjects, subjectOptions]);
+  }, [semesterSubjects, subjectOptions, warningDialogKeepExisting]);
+
+  const warningsAcknowledged = 
+    (!classesExistOtherGroupsSubgroups || (classesExistOtherGroupsSubgroups && warningDialogKeepExisting !== undefined)) &&
+    (!classesExistSelectedSubgroups || (classesExistSelectedSubgroups && overrideConfirm));
 
   const canGenerate =
     Boolean(selectedSemester) &&
     Boolean(selectedStudentGroup) &&
     selectedSubgroups.length > 0 &&
+    warningsAcknowledged &&
     !subjectsLoading &&
     semesterSubjects.length > 0 &&
     !generating;
@@ -175,7 +230,13 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
     setSubjectsError("");
     setGenerateError("");
     setSelectedStudentGroup("");
-    setSelectedSubgroups("");
+    setSelectedSubgroups([]);
+    setClassesExistOtherGroupsSubgroups(false);
+    setClassesExistSelectedSubgroups(false);
+    setExistingLectures([]);
+    setExistingExercises([]);
+    setWarningDialogKeepExisting();
+    setOverrideConfirm(false);
   };
 
   const handleSpecialtyChange = (event) => {
@@ -186,20 +247,40 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
     setSubjectsError("");
     setGenerateError("");
     setSelectedStudentGroup("");
-    setSelectedSubgroups("");
+    setSelectedSubgroups([]);
+    setClassesExistOtherGroupsSubgroups(false);
+    setClassesExistSelectedSubgroups(false);
+    setExistingLectures([]);
+    setExistingExercises([]);
+    setWarningDialogKeepExisting();
+    setOverrideConfirm(false);
   };
 
   const handleSemesterChange = (event) => {
     setSelectedSemester(event.target.value);
     setSubjectOptions({});
+    setSemesterSubjects([]);
+    setSubjectsError("");
     setGenerateError("");
     setSelectedStudentGroup("");
-    setSelectedSubgroups("");
+    setSelectedSubgroups([]);
+    setClassesExistOtherGroupsSubgroups(false);
+    setClassesExistSelectedSubgroups(false);
+    setExistingLectures([]);
+    setExistingExercises([]);
+    setWarningDialogKeepExisting();
+    setOverrideConfirm(false);
   };
 
   const handleGroupChange = (event) => {
     setSelectedStudentGroup(event.target.value);
-    setSelectedSubgroups(subgroups);
+    setSelectedSubgroups(studentGroups[event.target.value] || []);
+    setClassesExistOtherGroupsSubgroups(false);
+    setClassesExistSelectedSubgroups(false);
+    setExistingLectures([]);
+    setExistingExercises([]);
+    setWarningDialogKeepExisting();
+    setOverrideConfirm(false);
   }
 
   const updateEveryWeek = (subjectId, type, value) => {
@@ -224,6 +305,18 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
     setGenerateError("");
   };
 
+  const handleWarningDialogKeep = () => {
+    setWarningDialogKeepExisting(true);
+  }
+
+  const handleWarningDialogDelete = () => {
+    setWarningDialogKeepExisting(false);
+  }
+
+  const handleOverrideConfirm = () => {
+    setOverrideConfirm(!overrideConfirm);
+  }
+
   async function handleGenerate() {
     if (!canGenerate) return;
 
@@ -239,6 +332,7 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
           subgroups: selectedSubgroups,
           semester: selectedSemester,
           subjects_options: normalizedSubjectOptions,
+          conflicting_exercises: (warningDialogKeepExisting === true) ? existingExercises : ""
         }),
       });
 
@@ -271,10 +365,13 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          specialty_id: selectedSpecialtyId,
           group_number: generatedData?.info?.groupNumber,
           semester: generatedData?.info?.semester,
           subgroups: generatedData?.info.subgroups,
           generated: generatedData?.generated,
+          delete_existing: (warningDialogKeepExisting === false),
+          override_selected: overrideConfirm
         }),
       });
 
@@ -380,7 +477,7 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition disabled:cursor-not-allowed disabled:bg-slate-100 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
               >
                 <option value="">{studentGroupsLoading ? "Зареждане..." : "Избери група"}</option>
-                {studentGroups.map((groupNumber) => (
+                {!studentGroupsLoading && studentGroups && Object.keys(studentGroups).map((groupNumber) => (
                   <option key={groupNumber} value={groupNumber}>
                     {groupNumber}
                   </option>
@@ -395,7 +492,7 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
                 {!selectedStudentGroup ? (
                   <p className="mt-1 text-gray-500">Избери група</p>
                 ) : (
-                  subgroups.map((subgroup) => {
+                  studentGroups?.[selectedStudentGroup]?.map((subgroup) => {
                     const isSelected = selectedSubgroups.includes(subgroup);
 
                     return (
@@ -404,6 +501,7 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
                         type="button"
                         onClick={() => {
                           if (isSelected) {
+                            if (selectedSubgroups.length < 2) return;
                             setSelectedSubgroups(selectedSubgroups.filter((s) => s !== subgroup));
                           } else {
                             setSelectedSubgroups([...selectedSubgroups, subgroup]);
@@ -425,116 +523,163 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
         )}
       </div>
 
-      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h3 className="text-base font-semibold text-slate-800">
-            Настройки по предмети
-          </h3>
-          {selectedSemester && !subjectsLoading && (
-            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-              {semesterSubjects.length} предмет{(semesterSubjects.length > 1) && "а"}
-            </span>
+      {classesExistOtherGroupsSubgroups &&
+        <div className="mt-4 flex justify-between items-center gap-5 rounded-lg border border-red-200 bg-red-50 p-5">
+          <div className="text-7xl text-red-500">?!</div>
+          <div className="text-base text-red-700">Съществуват графици за тази специалност и семестър, които ограничават опциите при генерирането на този график. Ако запазите съществуващите графици, новият график ще се напасне според тях, но ако ги изтриете ще имате достъп до всички опции.</div>
+          <div className="flex flex-col items-center">
+            <button
+              type="button"
+              onClick={handleWarningDialogKeep}
+              className={`${warningDialogKeepExisting === true ? 'bg-green-600' : 'bg-gray-200'} w-fit shrink-0 rounded-md hover:bg-green-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed`}
+            >
+              Запази съществуващи
+            </button>
+            <button
+              type="button"
+              onClick={handleWarningDialogDelete}
+              className={`${warningDialogKeepExisting === false ? 'bg-red-600' : 'bg-gray-200'} mt-2 w-fit shrink-0 rounded-md hover:bg-red-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed`}
+            >
+              Изтрий всички
+            </button>
+          </div>
+          
+        </div>
+      }
+
+      {classesExistSelectedSubgroups &&
+        <div className="mt-4 flex justify-between items-center gap-5 rounded-lg border border-orange-200 bg-orange-50 p-5">
+          <div className="text-7xl text-amber-500">!</div>
+          <div className="text-base text-amber-700">Ако запазите генерираният график, съществуващият за избраните подгрупи ще бъде изгубен.</div>
+          <div className="">
+            <button
+              type="button"
+              onClick={handleOverrideConfirm}
+              className={`${overrideConfirm ? 'bg-green-600' : 'bg-gray-200'} mt-2 w-fit shrink-0 rounded-md hover:bg-green-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed`}
+            >
+              Потвърждавам
+            </button>
+          </div>
+          
+        </div>
+      }
+      
+      {warningDialogKeepExisting !== true && (
+        <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h3 className="text-base font-semibold text-slate-800">
+              Настройки по предмети
+            </h3>
+            {selectedStudentGroup && !subjectsLoading && warningsAcknowledged && (
+              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+                {semesterSubjects.length} предмет{(semesterSubjects.length > 1) && "а"}
+              </span>
+            )}
+          </div>
+
+          {!selectedStudentGroup ? (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
+              Избери факултет, специалност, семестър и група, за да настроиш предметите.
+            </div>
+          ) : !warningsAcknowledged ? (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
+              Потвърди предупрежденията по-горе.
+            </div>
+          ) : subjectsLoading ? (
+            <div className="flex items-center justify-center py-10">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-500" />
+            </div>
+          ) : subjectsError ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+              {subjectsError}
+            </div>
+          ) : semesterSubjects.length === 0 ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+              Няма намерени предмети за избрания семестър.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {semesterSubjects.map((subject) => {
+                const lectureEveryWeek =
+                  normalizedSubjectOptions[subject.id]?.lecture?.every_week ?? true;
+                const exerciseEveryWeek =
+                  normalizedSubjectOptions[subject.id]?.exercise?.every_week ?? true;
+
+                return (
+                  <div
+                    key={subject.id}
+                    className="rounded-lg border border-slate-200 p-3 transition hover:border-blue-300"
+                  >
+                    <div className="mb-3">
+                      <p className="font-semibold text-slate-800">{subject.name}</p>
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div className="rounded-md bg-slate-50 p-3">
+                        <p className="mb-2 text-sm font-medium text-slate-700">Лекция</p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => updateEveryWeek(subject.id, "lecture", true)}
+                            className={`rounded-md border px-3 py-2 text-sm transition ${
+                              lectureEveryWeek
+                                ? "border-emerald-600 bg-emerald-600 text-white"
+                                : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
+                            }`}
+                          >
+                            Всяка седмица
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateEveryWeek(subject.id, "lecture", false)}
+                            className={`rounded-md border px-3 py-2 text-sm transition ${
+                              !lectureEveryWeek
+                                ? "border-violet-600 bg-violet-600 text-white"
+                                : "border-slate-300 bg-white text-slate-700 hover:border-violet-400"
+                            }`}
+                          >
+                            През седмица
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="rounded-md bg-slate-50 p-3">
+                        <p className="mb-2 text-sm font-medium text-slate-700">
+                          Упражнение
+                        </p>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => updateEveryWeek(subject.id, "exercise", true)}
+                            className={`rounded-md border px-3 py-2 text-sm transition ${
+                              exerciseEveryWeek
+                                ? "border-emerald-600 bg-emerald-600 text-white"
+                                : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
+                            }`}
+                          >
+                            Всяка седмица
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateEveryWeek(subject.id, "exercise", false)}
+                            className={`rounded-md border px-3 py-2 text-sm transition ${
+                              !exerciseEveryWeek
+                                ? "border-violet-600 bg-violet-600 text-white"
+                                : "border-slate-300 bg-white text-slate-700 hover:border-violet-400"
+                            }`}
+                          >
+                            През седмица
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
-
-        {!selectedSemester ? (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5 text-sm text-slate-600">
-            Избери факултет, специалност и семестър, за да настроиш предметите.
-          </div>
-        ) : subjectsLoading ? (
-          <div className="flex items-center justify-center py-10">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-200 border-t-blue-500" />
-          </div>
-        ) : subjectsError ? (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-5 text-sm text-red-700">
-            {subjectsError}
-          </div>
-        ) : semesterSubjects.length === 0 ? (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-            Няма намерени предмети за избрания семестър.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {semesterSubjects.map((subject) => {
-              const lectureEveryWeek =
-                normalizedSubjectOptions[subject.id]?.lecture?.every_week ?? true;
-              const exerciseEveryWeek =
-                normalizedSubjectOptions[subject.id]?.exercise?.every_week ?? true;
-
-              return (
-                <div
-                  key={subject.id}
-                  className="rounded-lg border border-slate-200 p-3 transition hover:border-blue-300"
-                >
-                  <div className="mb-3">
-                    <p className="font-semibold text-slate-800">{subject.name}</p>
-                  </div>
-
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div className="rounded-md bg-slate-50 p-3">
-                      <p className="mb-2 text-sm font-medium text-slate-700">Лекция</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => updateEveryWeek(subject.id, "lecture", true)}
-                          className={`rounded-md border px-3 py-2 text-sm transition ${
-                            lectureEveryWeek
-                              ? "border-emerald-600 bg-emerald-600 text-white"
-                              : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
-                          }`}
-                        >
-                          Всяка седмица
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateEveryWeek(subject.id, "lecture", false)}
-                          className={`rounded-md border px-3 py-2 text-sm transition ${
-                            !lectureEveryWeek
-                              ? "border-violet-600 bg-violet-600 text-white"
-                              : "border-slate-300 bg-white text-slate-700 hover:border-violet-400"
-                          }`}
-                        >
-                          През седмица
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="rounded-md bg-slate-50 p-3">
-                      <p className="mb-2 text-sm font-medium text-slate-700">
-                        Упражнение
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => updateEveryWeek(subject.id, "exercise", true)}
-                          className={`rounded-md border px-3 py-2 text-sm transition ${
-                            exerciseEveryWeek
-                              ? "border-emerald-600 bg-emerald-600 text-white"
-                              : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
-                          }`}
-                        >
-                          Всяка седмица
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateEveryWeek(subject.id, "exercise", false)}
-                          className={`rounded-md border px-3 py-2 text-sm transition ${
-                            !exerciseEveryWeek
-                              ? "border-violet-600 bg-violet-600 text-white"
-                              : "border-slate-300 bg-white text-slate-700 hover:border-violet-400"
-                          }`}
-                        >
-                          През седмица
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      )}
 
       {generateError && (
         <p className="mt-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

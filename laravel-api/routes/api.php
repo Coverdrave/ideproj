@@ -21,6 +21,7 @@ Route::get('/', function () {
 
 Route::get('/schedule', [ScheduleController::class, 'index']);
 Route::get('/schedule/all', [ScheduleController::class, 'all']);
+Route::post('/schedule/get_existing_subgroups/', [ScheduleController::class, 'get_existing_subgroups']);
 Route::post('/schedule/create', [ScheduleController::class, 'create']);
 Route::post('/schedule/generate', [ScheduleController::class, 'generate']);
 Route::post('/schedule/save_generated', [ScheduleController::class, 'save_generated']);
