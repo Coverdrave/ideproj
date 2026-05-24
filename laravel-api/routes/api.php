@@ -17,8 +17,6 @@ Route::get('/', function () {
     return 'API';
 });
 
-// Route::apiResource('schedule', ScheduleController::class);
-
 Route::get('/schedule', [ScheduleController::class, 'index']);
 Route::get('/schedule/all', [ScheduleController::class, 'all']);
 Route::post('/schedule/get_existing_subgroups/', [ScheduleController::class, 'get_existing_subgroups']);
@@ -33,10 +31,16 @@ Route::get('/uni_class/get_compatible_classes', [UniClassController::class, 'get
 Route::post('/uni_class/create', [UniClassController::class, 'create']);
 Route::post('/uni_class/assign_to_schedules', [UniClassController::class, 'assign_to_schedules']);
 
-// Route::get('faculty/all', [FacultyController::class, 'all']);
-Route::get('faculty/all_with_specialties', [FacultyController::class, 'all_with_specialties']);
-// Route::get('faculty/specialties/{faculty_id}', [FacultyController::class, 'all_specialties']);
+Route::get('/faculty/all', [FacultyController::class, 'all']);
+Route::get('/faculty/all_with_specialties', [FacultyController::class, 'all_with_specialties']);
+Route::post('/faculty/create', [FacultyController::class, 'create']);
+Route::put('/faculty/update/{faculty_id}', [FacultyController::class, 'update']);
+Route::delete('/faculty/delete/{faculty_id}', [FacultyController::class, 'delete']);
 
-Route::get('specialty/{specialty_id}/semester_subjects/{semester}', [SpecialtyController::class, 'get_specialty_subjects_by_semester']);
+Route::get('/specialty/{specialty_id}/semester_subjects/{semester}', [SpecialtyController::class, 'get_specialty_subjects_by_semester']);
+Route::get('/specialty/all', [SpecialtyController::class, 'all']);
+Route::post('/specialty/create', [SpecialtyController::class, 'create']);
+Route::put('/specialty/update/{id}', [SpecialtyController::class, 'update']);
+Route::delete('/specialty/delete/{id}', [SpecialtyController::class, 'delete']);
 
-Route::get('student_group/get_groups_subgroups/{specialty_id}/{semester}', [StudentGroupController::class, 'get_groups_subgroups']);
+Route::get('/student_group/get_groups_subgroups/{specialty_id}/{semester}', [StudentGroupController::class, 'get_groups_subgroups']);
