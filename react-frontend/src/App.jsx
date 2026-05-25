@@ -4,6 +4,7 @@ import ScheduleGrid from "./components/ScheduleGrid.jsx";
 
 const Faculties = lazy(() => import('./components/Faculties.jsx'));
 const Specialties = lazy(() => import('./components/Specialties.jsx'));
+const Subjects = lazy(() => import('./components/Subjects.jsx'));
 const GenerateSchedule = lazy(() => import('./components/GenerateSchedule.jsx'));
 
 export default function App() {
@@ -56,6 +57,9 @@ export default function App() {
             <button type="button" onClick={() => open("specialties")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
               Специалности
             </button>
+            <button type="button" onClick={() => open("subjects")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Предмети
+            </button>
             <button type="button" onClick={() => open("generateSchedule")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
               Генериране
             </button>
@@ -63,6 +67,7 @@ export default function App() {
             <Suspense>
               {openModal === "faculties" && <Faculties closeModal={closeModal}/>}
               {openModal === "specialties" && <Specialties closeModal={closeModal}/>}
+              {openModal === "subjects" && <Subjects closeModal={closeModal}/>}
               {openModal === "generateSchedule" && <GenerateSchedule closeModal={closeModal} updateMainMenuData={updateData}/>}
             </Suspense>
           </div>

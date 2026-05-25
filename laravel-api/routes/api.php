@@ -26,6 +26,8 @@ Route::post('/schedule/save_generated', [ScheduleController::class, 'save_genera
 
 Route::get('/subject/all', [SubjectController::class, 'all']);
 Route::post('/subject/create', [SubjectController::class, 'create']);
+Route::put('/subject/update/{id}', [SubjectController::class, 'update']);
+Route::delete('/subject/delete/{id}', [SubjectController::class, 'delete']);
 
 Route::get('/uni_class/get_compatible_classes', [UniClassController::class, 'get_compatible_classes']);
 Route::post('/uni_class/create', [UniClassController::class, 'create']);

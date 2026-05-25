@@ -9,6 +9,8 @@ export default function Specialties({ closeModal }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
 
   const [nameInput, setNameInput] = useState("");
@@ -179,12 +181,38 @@ export default function Specialties({ closeModal }) {
     return mapping[level] || level;
   }
 
+  const filteredSpecialties = specialties.filter((specialty) => {
+    const searchLower = searchTerm.toLowerCase().trim();
+    const facultyShort = specialty.faculty?.short_name?.toLowerCase() || "";
+
+    return (
+      specialty.name.toLowerCase().includes(searchLower) ||
+      specialty.short_name.toLowerCase().includes(searchLower) ||
+      facultyShort.includes(searchLower)
+    );
+  });
+
   const mainBody = (
     <div className="w-[min(95vw,1100px)] max-h-[min(85vh,calc(100vh-4rem))] overflow-y-auto p-3">
       {loading && <p className="text-slate-500 text-center py-4">Зареждане...</p>}
       {error && <p className="text-red-500 text-center py-4">{error}</p>}
 
-      <div className="flex">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="relative flex-1 max-w-md">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Търсене по име, съкращение или факултет"
+            className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-colors"
+          />
+        </div>
+
         <button
           type="button"
           onClick={() => {
@@ -207,52 +235,59 @@ export default function Specialties({ closeModal }) {
                 <th scope="col" className="px-6 py-3">Факултет</th>
                 <th scope="col" className="px-6 py-3">Степен</th>
                 <th scope="col" className="px-6 py-3">Семестри</th>
-                <th scope="col" className="px-6 py-3">Форма</th>
                 <th scope="col" className="px-6 py-3 w-1 text-right">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {specialties.map((specialty) => (
-                <tr key={specialty.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-slate-900">{specialty.name}</td>
-                  <td className="px-6 py-4 uppercase font-semibold">{specialty.short_name}</td>
-                  <td className="px-6 py-4">{specialty.faculty?.short_name || `ID: ${specialty.faculty_id}`}</td>
-                  <td className="px-6 py-4">{formatDegree(specialty.degree_level)}</td>
-                  <td className="px-6 py-4 text-center">{specialty.duration_semester}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${specialty.is_part_time ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
-                      {specialty.is_part_time ? "Задочно" : "Редовно"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <div className="flex items-center gap-3 justify-end">
-                      <button
-                        onClick={() => {
-                          setSelectedSpecialty(specialty);
-                          setView("edit");
-                        }}
-                        className="rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
-                      >
-                        Редактиране
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedSpecialty(specialty);
-                          setView("delete");
-                        }}
-                        className="rounded-md bg-rose-50 px-2 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors"
-                      >
-                        Изтриване
-                      </button>
-                    </div>
+              {filteredSpecialties.length > 0 ? (
+                filteredSpecialties.map((specialty) => (
+                  <tr key={specialty.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-900">{specialty.name}</td>
+                    <td className="px-6 py-4 uppercase font-semibold text-slate-500">{specialty.short_name}</td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-800 uppercase">
+                        {specialty.faculty?.short_name || `ID: ${specialty.faculty_id}`}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">{formatDegree(specialty.degree_level)}</td>
+                    <td className="px-6 py-4 text-center">{specialty.duration_semester}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center gap-3 justify-end">
+                        <button
+                          onClick={() => {
+                            setSelectedSpecialty(specialty);
+                            setView("edit");
+                          }}
+                          className="rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                        >
+                          Редактиране
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedSpecialty(specialty);
+                            setView("delete");
+                          }}
+                          className="rounded-md bg-rose-50 px-2 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors"
+                        >
+                          Изтриване
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="px-6 py-10 text-center text-sm text-slate-400 italic">
+                    Няма намерени специалности, отговарящи на критериите.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
             <tfoot className="bg-slate-50 border-t border-slate-200 text-xs text-slate-500">
               <tr>
-                <td colSpan="7" className="px-6 py-3 font-medium">
-                  Показване на {specialties.length} резултат{specialties.length !== 1 && "а"}
+                <td colSpan="6" className="px-6 py-3 font-medium">
+                  Показване на {filteredSpecialties.length} резултат{filteredSpecialties.length !== 1 && "а"}
+                  {searchTerm && ` (филтрирани от общо ${specialties.length})`}
                 </td>
               </tr>
             </tfoot>
@@ -474,7 +509,7 @@ export default function Specialties({ closeModal }) {
                 Сигурни ли сте, че искате да изтриете специалност <span className="font-semibold text-slate-800">"{selectedSpecialty.name}"</span>?
               </p>
               <p className="text-xs text-rose-600 font-medium bg-rose-50 rounded p-2 border border-rose-100">
-                ⚠️ Внимание: Това автоматично ще премахне всички прилежащи академични групи и разписи към нея!
+                ⚠️ Внимание: Това автоматично ще премахне всички прилежащие академични групи и разписи към нея!
               </p>
             </div>
 

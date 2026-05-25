@@ -8,6 +8,8 @@ export default function Faculties({ closeModal }) {
   const [facultiesLoading, setFacultiesLoading] = useState(true);
   const [facultiesError, setFacultiesError] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [selectedFaculty, setSelectedFaculty] = useState(null);
 
   const [nameInput, setNameInput] = useState("");
@@ -146,17 +148,38 @@ export default function Faculties({ closeModal }) {
     }
   }
 
+  const filteredFaculties = faculties.filter((faculty) => {
+    const searchLower = searchTerm.toLowerCase().trim();
+    return (
+      faculty.name.toLowerCase().includes(searchLower) ||
+      faculty.short_name.toLowerCase().includes(searchLower)
+    );
+  });
+
   const mainBody = (
     <div className="w-[min(95vw,1100px)] max-h-[min(85vh,calc(100vh-4rem))] overflow-y-auto p-3">
       {facultiesLoading && <p className="text-slate-500 text-center py-4">Зареждане...</p>}
       {facultiesError && <p className="text-red-500 text-center py-4">{facultiesError}</p>}
 
-      <div className="flex">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="relative flex-1 max-w-md">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Търсене по име или абревиатура"
+            className="w-full rounded-md border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm transition-colors"
+          />
+        </div>
+
         <button
           type="button"
-          onClick={() => {
-            setView('create');
-          }}
+          onClick={() => setView('create')}
           className="w-fit shrink-0 rounded-md bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed"
         >
           Създаване
@@ -168,46 +191,55 @@ export default function Faculties({ closeModal }) {
           <table className="w-full border-collapse bg-white text-left text-sm text-slate-600">
             <thead className="bg-slate-50 text-xs uppercase text-slate-700 font-semibold tracking-wider">
               <tr className="border-b border-slate-200">
-                <th scope="col" className="px-6 py-3 w-1">Име</th>
-                <th scope="col" className="px-6 py-3">Абревиатура</th>
-                <th scope="col" className="px-6 py-3 w-1">Действия</th>
+                <th scope="col" className="px-6 py-3">Име</th>
+                <th scope="col" className="px-6 py-3 w-1/4">Абревиатура</th>
+                <th scope="col" className="px-6 py-3 w-1 text-right">Действия</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {faculties.map((faculty) => (
-                <tr key={faculty.name} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">{faculty.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{faculty.short_name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right">
-                    <div className="flex items-center gap-3 justify-start">
-                      <button
-                        onClick={() => {
-                          setSelectedFaculty(faculty);
-                          setView("edit");
-                        }}
-                        className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
-                      >
-                        Редактиране
-                      </button>
+              {filteredFaculties.length > 0 ? (
+                filteredFaculties.map((faculty) => (
+                  <tr key={faculty.id || faculty.name} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-900">{faculty.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap uppercase font-semibold text-slate-500">{faculty.short_name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <div className="flex items-center gap-3 justify-end">
+                        <button
+                          onClick={() => {
+                            setSelectedFaculty(faculty);
+                            setView("edit");
+                          }}
+                          className="inline-flex items-center gap-1 rounded-md bg-blue-50 px-2 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+                        >
+                          Редактиране
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          setSelectedFaculty(faculty);
-                          setView("delete");
-                        }}
-                        className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors"
-                      >
-                        Изтриване
-                      </button>
-                    </div>
+                        <button
+                          onClick={() => {
+                            setSelectedFaculty(faculty);
+                            setView("delete");
+                          }}
+                          className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-100 transition-colors"
+                        >
+                          Изтриване
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="3" className="px-6 py-10 text-center text-sm text-slate-400 italic">
+                    Няма намерени факултети, отговарящи на критериите.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
             <tfoot className="bg-slate-50 border-t border-slate-200 text-xs text-slate-500">
               <tr>
-                <td colSpan="4" className="px-6 py-3 font-medium">
-                  Показване на {faculties.length} резултат{faculties.length != 1 && 'а'}
+                <td colSpan="3" className="px-6 py-3 font-medium">
+                  Показване на {filteredFaculties.length} резултат{filteredFaculties.length !== 1 && 'а'}
+                  {searchTerm && ` (филтрирани от общо ${faculties.length})`}
                 </td>
               </tr>
             </tfoot>
@@ -375,7 +407,6 @@ export default function Faculties({ closeModal }) {
       <div className="mt-3 rounded-xl border border-slate-200 bg-white p-8 shadow-sm flex flex-col items-center justify-center text-center min-h-[300px]">
         {selectedFaculty ? (
           <div className="max-w-md w-full space-y-6">
-            
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-rose-50">
               <svg className="h-7 w-7 text-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
@@ -437,9 +468,9 @@ export default function Faculties({ closeModal }) {
                (view === "delete") ? deleteBody : (<></>);
 
   const headerText = (view === "main") ? 'Факултети' :
-                      (view === "create") ? 'Създаване на факултет' :
-                      (view === "edit") ? 'Редактиране на факултет' :
-                      (view === "delete") ? 'Изтриване на факултет' : '';
+                     (view === "create") ? 'Създаване на факултет' :
+                     (view === "edit") ? 'Редактиране на факултет' :
+                     (view === "delete") ? 'Изтриване на факултет' : '';
 
   return <PopupModal close={closeModal} headerText={headerText} body={body} />;
 }
