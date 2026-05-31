@@ -8,7 +8,17 @@ use App\Models\Subject;
 class SubjectController extends Controller
 {
     public function all() {
-        return response()->json(Subject::with('specialty')->get(), 200);
+        $subjects = Subject::with(['specialty', 'lecturers' => function($query) {
+            $query->withPivot('type');
+        }])->get();
+
+        $sorted = $subjects->sortBy([
+            ['specialty_id', 'asc'],
+            ['name', 'asc'],
+            ['study_semester', 'asc']
+        ]);
+
+        return response()->json($sorted->values(), 200);
     }
 
     public function create(Request $request) {
@@ -22,7 +32,7 @@ class SubjectController extends Controller
         ]);
 
         $subject = Subject::create($validated);
-        return response()->json($subject->load('specialty'), 201);
+        return response()->json($subject->load(['specialty', 'lecturers']), 201);
     }
 
     public function update(Request $request, int $id) {
@@ -38,12 +48,38 @@ class SubjectController extends Controller
         ]);
 
         $subject->update($validated);
-        return response()->json($subject->load('specialty'), 200);
+        return response()->json($subject->load(['specialty', 'lecturers']), 200);
     }
 
     public function delete(int $id) {
         $subject = Subject::findOrFail($id);
         $subject->delete();
         return response()->json(['message' => 'Дисциплината е изтрита.'], 200);
+    }
+
+    public function syncLecturers(Request $request, int $id) {
+        $subject = Subject::findOrFail($id);
+
+        $validated = $request->validate([
+            'lecturers' => 'present|array',
+            'lecturers.*.lecturer_id' => 'required|exists:lecturers,id',
+            'lecturers.*.type' => 'required|in:lecture,exercise,both'
+        ]);
+
+        $syncData = [];
+        foreach ($validated['lecturers'] as $item) {
+            $syncData[$item['lecturer_id']] = [
+                'type' => $item['type']
+            ];
+        }
+
+        $subject->lecturers()->sync($syncData);
+
+        return response()->json([
+            'message' => 'Заетостта на преподавателите е обновена успешно.',
+            'subject' => $subject->load(['specialty', 'lecturers' => function($query) {
+                $query->withPivot('type');
+            }])
+        ], 200);
     }
 }

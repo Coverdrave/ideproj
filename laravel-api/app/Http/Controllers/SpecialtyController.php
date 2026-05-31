@@ -17,10 +17,23 @@ class SpecialtyController extends Controller
     }
 
     public function all() {
-        return response()->json(Specialty::with('faculty')->get(), 200);
+        $specialties = Specialty::with('faculty')->get();
+
+        $sorted = $specialties->sortBy([
+            ['faculty_id', 'asc'],
+            ['name', 'asc']
+        ]);
+
+        return response()->json($sorted->values(), 200);
     }
 
     public function create(Request $request) {
+        // Force backend logic to explicitly lock structural variants down
+        $request->merge([
+            'degree_level' => 'bachelor',
+            'is_part_time' => 0,
+        ]);
+
         $validated = $request->validate([
             'name' => 'required|string|regex:/^[А-Яа-я\s\,\-]+$/u',
             'short_name' => 'required|string|uppercase|regex:/^[А-Я\-\d]+$/u',
@@ -47,6 +60,12 @@ class SpecialtyController extends Controller
 
     public function update(Request $request, int $id) {
         $specialty = Specialty::findOrFail($id);
+
+        // Force backend logic to explicitly lock structural variants down
+        $request->merge([
+            'degree_level' => 'bachelor',
+            'is_part_time' => 0,
+        ]);
 
         $validated = $request->validate([
             'name' => 'required|string|regex:/^[А-Яа-я\s\,\-]+$/u',

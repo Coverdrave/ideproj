@@ -1,11 +1,15 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import "./App.css";
 import ScheduleGrid from "./components/ScheduleGrid.jsx";
+import StudentGroups from "./components/StudentGroups.jsx";
+import Schedules from "./components/Schedules.jsx";
 
 const Faculties = lazy(() => import('./components/Faculties.jsx'));
 const Specialties = lazy(() => import('./components/Specialties.jsx'));
 const Subjects = lazy(() => import('./components/Subjects.jsx'));
+const Lecturers = lazy(() => import('./components/Lecturers.jsx'));
 const GenerateSchedule = lazy(() => import('./components/GenerateSchedule.jsx'));
+const ChangeScheduleModal = lazy(() => import('./components/ChangeScheduleModal.jsx'));
 
 export default function App() {
   const [apiData, setApiData] = useState([]);
@@ -48,7 +52,7 @@ export default function App() {
 
   return (
     <>
-      <div className="mx-5 mb-40">
+      <div className="mx-5 mb-40 ">
         <div className="m-5 flex gap-3 justify-center">
           <div className="flex gap-3">
             <button type="button" onClick={() => open("faculties")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
@@ -60,6 +64,15 @@ export default function App() {
             <button type="button" onClick={() => open("subjects")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
               Предмети
             </button>
+            <button type="button" onClick={() => open("lecturers")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Преподаватели
+            </button>
+            <button type="button" onClick={() => open("studentGroups")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Групи
+            </button>
+            <button type="button" onClick={() => open("schedules")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
+              Разписания
+            </button>
             <button type="button" onClick={() => open("generateSchedule")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
               Генериране
             </button>
@@ -68,7 +81,11 @@ export default function App() {
               {openModal === "faculties" && <Faculties closeModal={closeModal}/>}
               {openModal === "specialties" && <Specialties closeModal={closeModal}/>}
               {openModal === "subjects" && <Subjects closeModal={closeModal}/>}
+              {openModal === "lecturers" && <Lecturers closeModal={closeModal}/>}
+              {openModal === "studentGroups" && <StudentGroups closeModal={closeModal}/>}
+              {openModal === "schedules" && <Schedules closeModal={closeModal}/>}
               {openModal === "generateSchedule" && <GenerateSchedule closeModal={closeModal} updateMainMenuData={updateData}/>}
+              {openModal === "changeScheduleModal" && <ChangeScheduleModal closeModal={closeModal} updateMainMenuData={updateData}/>}
             </Suspense>
           </div>
           <div>

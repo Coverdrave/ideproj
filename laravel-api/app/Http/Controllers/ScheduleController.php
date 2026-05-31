@@ -80,7 +80,7 @@ class ScheduleController extends Controller
         ];
     }
 
-    public function all() {
+    public function change_schedule_modal() {
         $schedules = Schedule::with('studentGroup.specialty')->get();
 
         return $schedules->map(function ($schedule) {
@@ -92,42 +92,71 @@ class ScheduleController extends Controller
         })->unique()->values();
     }
 
+    public function all() {
+        $schedules = Schedule::with('studentGroup.specialty')->get();
+
+        $sorted = $schedules->sortBy([
+            ['studentGroup.group_number', 'asc'],
+            ['subgroup', 'asc'],
+            ['semester', 'asc']
+        ]);
+
+        return response()->json($sorted->values());
+    }
+
     public function create(Request $request) {
-    //     $validated = $request->validate([
-    //         'group' => 'required|string|max:255',
-    //         'year' => 'required|integer',
-    //         'courseYear' => 'required|integer',
-    //     ]);
+        $validated = $request->validate([
+            'student_group_id' => 'required|exists:student_groups,id',
+            'subgroup'         => 'required|string|size:1',
+            'semester'         => 'required|integer|min:1',
+        ]);
 
-    //     $subgroup = ['A', 'B'];
-    //     $day = [0, 1, 2, 3, 4, 5, 6];
-    //     $isOddWeek = [false, true];
-    //     $isWinterTerm = [false, true];
+        // Enforce Laravel manual check or rely on catch blocks for the composite unique index
+        $exists = Schedule::where('student_group_id', $validated['student_group_id'])
+            ->where('subgroup', $validated['subgroup'])
+            ->where('semester', $validated['semester'])
+            ->exists();
 
-    //     foreach ($subgroup as $sg) {
-    //        foreach ($day as $d) {
-    //             foreach ($isOddWeek as $week) {
-    //                 foreach ($isWinterTerm as $term) {
-    //                     $schedule = new Schedule([
-    //                         'group' => $request->group,
-    //                         'year' => $request->year,
-    //                         'courseYear' => $request->courseYear,
+        if ($exists) {
+            return response()->json([
+                'message' => 'Разписание за тази група, подгрупа и семестър вече съществува.'
+            ], 422);
+        }
 
-    //                         'subgroup' => $sg,
-    //                         'day' => $d,
-    //                         'isOddWeek' => $week,
-    //                         'isWinterTerm' => $term,
-    //                     ]);
+        $schedule = Schedule::create($validated);
 
-    //                     $schedule->save();
-    //                 }
-    //             }
-    //        }
-    //     }
+        return response()->json($schedule->load('studentGroup.specialty'), 201);
+    }
 
-    //     return response()->json([
-    //         'message' => 'Успешно създаване',
-    //     ], 201);
+    public function update(Request $request, int $id) {
+        $schedule = Schedule::findOrFail($id);
+
+        $validated = $request->validate([
+            'student_group_id' => 'required|exists:student_groups,id',
+            'subgroup'         => 'required|string|size:1',
+            'semester'         => 'required|integer|min:1|max:12',
+        ]);
+
+        $duplicate = Schedule::where('student_group_id', $validated['student_group_id'])
+            ->where('subgroup', $validated['subgroup'])
+            ->where('semester', $validated['semester'])
+            ->where('id', '!=', $schedule->id)
+            ->exists();
+
+        if ($duplicate) {
+            return response()->json([
+                'message' => 'Разписание за тази подгрупа и семестър вече съществува за тази група.'
+            ], 422);
+        }
+
+        $schedule->update($validated);
+
+        return response()->json($schedule->load('studentGroup.specialty'));
+    }
+
+    public function destroy(int $id) {
+        Schedule::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
     }
 
     public function get_existing_subgroups(Request $request) {
@@ -215,10 +244,10 @@ class ScheduleController extends Controller
 
         if ($validated['delete_existing']) {
             Schedule::whereHas('studentGroup', function($query) use ($validated) {
-                $query->where('specialty_id', $validated['specialty_id'])
-                    ->whereNot('group_number', $validated['group_number']);
+                $query->where('specialty_id', $validated['specialty_id']);
             })
             ->where('semester', $validated['semester'])
+            ->whereNotIn('id', $schedules->pluck('id'))
             ->each(function ($schedule) {
                 $schedule->uniClasses()->detach();
             });

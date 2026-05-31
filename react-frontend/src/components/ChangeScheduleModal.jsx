@@ -5,7 +5,7 @@ export default function ChangeScheduleModal({ closeModal, updateMainMenuData }) 
   const [allSchedules, setAllSchedules] = useState([]);
 
   async function getAllSchedules() {
-    const res = await fetch("/api/schedule/all");
+    const res = await fetch("/api/schedule/change_schedule_modal");
     const data = await res.json();
 
     if (res.ok) {

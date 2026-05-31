@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import PopupModal from "./_PopupModal.jsx";
 import ScheduleGrid from "./ScheduleGrid.jsx";
 
-const semesterToTerm = (semester) => (semester % 2 === 1 ? "Зимен" : "Летен");
+const semesterToTerm = (semester) => (semester % 2 === 1 ? "зимен" : "летен");
 const semesterToCourse = (semester) => Math.ceil(semester / 2);
 
 export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
@@ -452,8 +452,7 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
               <option value="">Избери семестър</option>
               {availableSemesters.map((semester) => (
                 <option key={semester} value={semester}>
-                  {semester}. семестър - {semesterToTerm(semester)} (Курс{" "}
-                  {semesterToCourse(semester)})
+                  {semesterToCourse(semester)} курс, {semesterToTerm(semester)} ({semester} сем.)
                 </option>
               ))}
             </select>
@@ -524,43 +523,65 @@ export default function GenerateSchedule({ closeModal, updateMainMenuData }) {
       </div>
 
       {classesExistOtherGroupsSubgroups &&
-        <div className="mt-4 flex justify-between items-center gap-5 rounded-lg border border-red-200 bg-red-50 p-5">
-          <div className="text-7xl text-red-500">?!</div>
-          <div className="text-base text-red-700">Съществуват графици за тази специалност и семестър, които ограничават опциите при генерирането на този график. Ако запазите съществуващите графици, новият график ще се напасне според тях, но ако ги изтриете ще имате достъп до всички опции.</div>
-          <div className="flex flex-col items-center">
+        <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 rounded-lg border border-red-200 bg-red-50 p-5">
+          <div className="flex items-center gap-4">
+            <div className="text-5xl text-red-500 font-bold animate-pulse">?!</div>
+            <div className="text-base font-medium text-red-900">
+              Съществуват графици за тази специалност. Моля, изберете действие:
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch"> 
             <button
               type="button"
               onClick={handleWarningDialogKeep}
-              className={`${warningDialogKeepExisting === true ? 'bg-green-600' : 'bg-gray-200'} w-fit shrink-0 rounded-md hover:bg-green-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed`}
+              className={`px-5 py-2.5 text-sm font-semibold rounded-md shadow-sm transition border-2 w-full sm:w-40
+                ${warningDialogKeepExisting === true 
+                  ? 'bg-green-600 border-green-600 text-white hover:bg-green-700' 
+                  : 'bg-white border-green-600 text-green-700 hover:bg-green-50'
+                }`}
             >
               Запази съществуващи
             </button>
+            
             <button
               type="button"
               onClick={handleWarningDialogDelete}
-              className={`${warningDialogKeepExisting === false ? 'bg-red-600' : 'bg-gray-200'} mt-2 w-fit shrink-0 rounded-md hover:bg-red-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed`}
+              className={`px-5 py-2.5 text-sm font-semibold rounded-md shadow-sm transition border-2 w-full sm:w-40
+                ${warningDialogKeepExisting === false 
+                  ? 'bg-red-600 border-red-600 text-white hover:bg-red-700' 
+                  : 'bg-white border-red-600 text-red-700 hover:bg-red-50'
+                }`}
             >
               Изтрий всички
             </button>
+            
           </div>
-          
         </div>
       }
 
       {classesExistSelectedSubgroups &&
-        <div className="mt-4 flex justify-between items-center gap-5 rounded-lg border border-orange-200 bg-orange-50 p-5">
-          <div className="text-7xl text-amber-500">!</div>
-          <div className="text-base text-amber-700">Ако запазите генерираният график, съществуващият за избраните подгрупи ще бъде изгубен.</div>
-          <div className="">
+        <div className="mt-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 rounded-lg border border-orange-200 bg-orange-50 p-5">
+          <div className="flex items-center gap-4">
+            <div className="text-5xl text-amber-500 font-bold animate-pulse">!</div>
+            <div className="text-base font-medium text-amber-900">
+              Ако запазите генерирания график, съществуващият за избраните подгрупи ще бъде изгубен.
+            </div>
+          </div>
+
+          <div className="w-full sm:w-auto shrink-0">
             <button
               type="button"
               onClick={handleOverrideConfirm}
-              className={`${overrideConfirm ? 'bg-green-600' : 'bg-gray-200'} mt-2 w-fit shrink-0 rounded-md hover:bg-green-700 text-white px-5 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed`}
+              className={`w-full sm:w-44 px-5 py-2.5 text-sm font-semibold rounded-md shadow-sm transition-all border-2 text-center
+                ${overrideConfirm 
+                  ? 'bg-green-600 border-green-600 text-white hover:bg-green-700' 
+                  : 'bg-white border-amber-500 text-amber-700 hover:bg-amber-100/50'
+                }`}
             >
-              Потвърждавам
+              {overrideConfirm ? '✓ Потвърдено' : 'Потвърждавам'}
             </button>
           </div>
-          
         </div>
       }
       

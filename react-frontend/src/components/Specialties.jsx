@@ -16,9 +16,7 @@ export default function Specialties({ closeModal }) {
   const [nameInput, setNameInput] = useState("");
   const [shortNameInput, setShortNameInput] = useState("");
   const [facultyIdInput, setFacultyIdInput] = useState("");
-  const [degreeLevelInput, setDegreeLevelInput] = useState("bachelor");
   const [durationInput, setDurationInput] = useState("8");
-  const [isPartTimeInput, setIsPartTimeInput] = useState(false);
 
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
@@ -61,9 +59,7 @@ export default function Specialties({ closeModal }) {
       setNameInput(selectedSpecialty.name);
       setShortNameInput(selectedSpecialty.short_name);
       setFacultyIdInput(selectedSpecialty.faculty_id);
-      setDegreeLevelInput(selectedSpecialty.degree_level);
       setDurationInput(selectedSpecialty.duration_semester.toString());
-      setIsPartTimeInput(!!selectedSpecialty.is_part_time);
       setFormError("");
     }
   }, [selectedSpecialty, view]);
@@ -72,9 +68,7 @@ export default function Specialties({ closeModal }) {
     setNameInput("");
     setShortNameInput("");
     setFacultyIdInput(faculties[0]?.id || "");
-    setDegreeLevelInput("bachelor");
     setDurationInput("8");
-    setIsPartTimeInput(false);
     setFormError("");
   }
 
@@ -96,9 +90,9 @@ export default function Specialties({ closeModal }) {
           name: nameInput,
           short_name: shortNameInput,
           faculty_id: Number(facultyIdInput),
-          degree_level: degreeLevelInput,
+          degree_level: "bachelor", // Fixed payload variable
           duration_semester: Number(durationInput),
-          is_part_time: isPartTimeInput
+          is_part_time: false // Fixed payload variable
         })
       });
       const data = await res.json();
@@ -130,9 +124,9 @@ export default function Specialties({ closeModal }) {
           name: nameInput,
           short_name: shortNameInput,
           faculty_id: Number(facultyIdInput),
-          degree_level: degreeLevelInput,
+          degree_level: "bachelor", // Fixed payload variable
           duration_semester: Number(durationInput),
-          is_part_time: isPartTimeInput
+          is_part_time: false // Fixed payload variable
         })
       });
       const data = await res.json();
@@ -331,29 +325,17 @@ export default function Specialties({ closeModal }) {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Прилежащ Факултет</label>
-            <select
-              value={facultyIdInput} required onChange={(e) => setFacultyIdInput(e.target.value)}
-              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="" disabled>Изберете факултет...</option>
-              {faculties.map((f) => (
-                <option key={f.id} value={f.id}>{f.name} ({f.short_name})</option>
-              ))}
-            </select>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Степен на образование</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Прилежащ Факултет</label>
               <select
-                value={degreeLevelInput} onChange={(e) => setDegreeLevelInput(e.target.value)}
+                value={facultyIdInput} required onChange={(e) => setFacultyIdInput(e.target.value)}
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                <option value="bachelor">Бакалавър</option>
-                <option value="master">Магистър</option>
-                <option value="phd">Докторант</option>
+                <option value="" disabled>Изберете факултет...</option>
+                {faculties.map((f) => (
+                  <option key={f.id} value={f.id}>{f.name} ({f.short_name})</option>
+                ))}
               </select>
             </div>
 
@@ -364,16 +346,6 @@ export default function Specialties({ closeModal }) {
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
-          </div>
-
-          <div className="flex items-center pt-2">
-            <input
-              id="part_time_check" type="checkbox" checked={isPartTimeInput} onChange={(e) => setIsPartTimeInput(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="part_time_check" className="ml-2 block text-sm font-medium text-slate-700 select-none">
-              Обучението е задочна форма (Задочно)
-            </label>
           </div>
 
           <div className="flex justify-end pt-2">
@@ -423,28 +395,16 @@ export default function Specialties({ closeModal }) {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Прилежащ Факултет</label>
-              <select
-                value={facultyIdInput} required onChange={(e) => setFacultyIdInput(e.target.value)}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                {faculties.map((f) => (
-                  <option key={f.id} value={f.id}>{f.name} ({f.short_name})</option>
-                ))}
-              </select>
-            </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">Степен на образование</label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Прилежащ Факултет</label>
                 <select
-                  value={degreeLevelInput} onChange={(e) => setDegreeLevelInput(e.target.value)}
+                  value={facultyIdInput} required onChange={(e) => setFacultyIdInput(e.target.value)}
                   className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 >
-                  <option value="bachelor">Бакалавър</option>
-                  <option value="master">Магистър</option>
-                  <option value="phd">Докторант</option>
+                  {faculties.map((f) => (
+                    <option key={f.id} value={f.id}>{f.name} ({f.short_name})</option>
+                  ))}
                 </select>
               </div>
 
@@ -455,16 +415,6 @@ export default function Specialties({ closeModal }) {
                   className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
               </div>
-            </div>
-
-            <div className="flex items-center pt-2">
-              <input
-                id="edit_part_time_check" type="checkbox" checked={isPartTimeInput} onChange={(e) => setIsPartTimeInput(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="edit_part_time_check" className="ml-2 block text-sm font-medium text-slate-700 select-none">
-                Обучението е задочна форма (Задочно)
-              </label>
             </div>
 
             <div className="flex justify-end pt-2">
@@ -538,14 +488,14 @@ export default function Specialties({ closeModal }) {
   );
 
   const body = (view === "main") ? mainBody :
-               (view === "create") ? createBody :
-               (view === "edit") ? editBody :
-               (view === "delete") ? deleteBody : (<></>);
+                (view === "create") ? createBody :
+                (view === "edit") ? editBody :
+                (view === "delete") ? deleteBody : (<></>);
 
   const headerText = (view === "main") ? "Специалности" :
-                     (view === "create") ? "Създаване на специалност" :
-                     (view === "edit") ? "Редактиране на специалност" :
-                     (view === "delete") ? "Изтриване на специалност" : "";
+                       (view === "create") ? "Създаване на специалност" :
+                       (view === "edit") ? "Редактиране на специалност" :
+                       (view === "delete") ? "Изтриване на специалност" : "";
 
   return <PopupModal close={closeModal} headerText={headerText} body={body} />;
 }
