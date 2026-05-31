@@ -316,7 +316,7 @@ export default function ScheduleGrid({ apiData }) {
                         >
                           <strong>{cls.subject}</strong>
                           {/* <br/> */}
-                          <small>{cls.isExercise ? "упражнение" : "лекция"}, {cls.room}</small>
+                          <small>{cls.isExercise ? "упражнение" : "лекция"}</small>
                         </div>
                       )
                     }

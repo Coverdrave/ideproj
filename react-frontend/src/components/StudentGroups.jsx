@@ -206,7 +206,7 @@ export default function StudentGroups({ closeModal }) {
           <table className="w-full border-collapse bg-white text-left text-sm text-slate-600">
             <thead className="bg-slate-50 text-xs uppercase text-slate-700 font-semibold tracking-wider">
               <tr className="border-b border-slate-200">
-                <th scope="col" className="px-6 py-3 w-1/4">Група</th>
+                <th scope="col" className="px-6 py-3">Група</th>
                 <th scope="col" className="px-6 py-3">Специалност</th>
                 <th scope="col" className="px-6 py-3 w-1 text-right">Действия</th>
               </tr>
