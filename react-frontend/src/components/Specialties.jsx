@@ -90,9 +90,9 @@ export default function Specialties({ closeModal }) {
           name: nameInput,
           short_name: shortNameInput,
           faculty_id: Number(facultyIdInput),
-          degree_level: "bachelor", // Fixed payload variable
+          // degree_level: "bachelor", // Fixed payload variable
           duration_semester: Number(durationInput),
-          is_part_time: false // Fixed payload variable
+          // is_part_time: false // Fixed payload variable
         })
       });
       const data = await res.json();
@@ -124,9 +124,9 @@ export default function Specialties({ closeModal }) {
           name: nameInput,
           short_name: shortNameInput,
           faculty_id: Number(facultyIdInput),
-          degree_level: "bachelor", // Fixed payload variable
+          // degree_level: "bachelor", // Fixed payload variable
           duration_semester: Number(durationInput),
-          is_part_time: false // Fixed payload variable
+          // is_part_time: false // Fixed payload variable
         })
       });
       const data = await res.json();
@@ -170,10 +170,10 @@ export default function Specialties({ closeModal }) {
     }
   }
 
-  function formatDegree(level) {
-    const mapping = { bachelor: "Бакалавър", master: "Магистър", phd: "Докторант" };
-    return mapping[level] || level;
-  }
+  // function formatDegree(level) {
+  //   const mapping = { bachelor: "Бакалавър", master: "Магистър", phd: "Докторант" };
+  //   return mapping[level] || level;
+  // }
 
   const filteredSpecialties = specialties.filter((specialty) => {
     const searchLower = searchTerm.toLowerCase().trim();
@@ -227,7 +227,7 @@ export default function Specialties({ closeModal }) {
                 <th scope="col" className="px-6 py-3">Име</th>
                 <th scope="col" className="px-6 py-3">Съкращение</th>
                 <th scope="col" className="px-6 py-3">Факултет</th>
-                <th scope="col" className="px-6 py-3">Степен</th>
+                {/* <th scope="col" className="px-6 py-3">Степен</th> */}
                 <th scope="col" className="px-6 py-3">Семестри</th>
                 <th scope="col" className="px-6 py-3 w-1 text-right">Действия</th>
               </tr>
@@ -243,7 +243,7 @@ export default function Specialties({ closeModal }) {
                         {specialty.faculty?.short_name || `ID: ${specialty.faculty_id}`}
                       </span>
                     </td>
-                    <td className="px-6 py-4">{formatDegree(specialty.degree_level)}</td>
+                    {/* <td className="px-6 py-4">{formatDegree(specialty.degree_level)}</td> */}
                     <td className="px-6 py-4 text-center">{specialty.duration_semester}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center gap-3 justify-end">

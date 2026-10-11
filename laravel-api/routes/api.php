@@ -21,7 +21,6 @@ Route::get('/', function () {
 Route::get('/schedule', [ScheduleController::class, 'index']);
 Route::get('/schedule/change_schedule_modal', [ScheduleController::class, 'change_schedule_modal']);
 Route::post('/schedule/get_existing_subgroups/', [ScheduleController::class, 'get_existing_subgroups']);
-Route::post('/schedule/create', [ScheduleController::class, 'create']);
 Route::post('/schedule/generate', [ScheduleController::class, 'generate']);
 Route::post('/schedule/save_generated', [ScheduleController::class, 'save_generated']);
 Route::get('/schedule/all', [ScheduleController::class, 'all']);
@@ -35,9 +34,9 @@ Route::put('/subject/update/{id}', [SubjectController::class, 'update']);
 Route::delete('/subject/delete/{id}', [SubjectController::class, 'delete']);
 Route::put('/subject/update_lecturers/{id}', [SubjectController::class, 'syncLecturers']);
 
-Route::get('/uni_class/get_compatible_classes', [UniClassController::class, 'get_compatible_classes']);
-Route::post('/uni_class/create', [UniClassController::class, 'create']);
-Route::post('/uni_class/assign_to_schedules', [UniClassController::class, 'assign_to_schedules']);
+// Route::get('/uni_class/get_compatible_classes', [UniClassController::class, 'get_compatible_classes']);
+// Route::post('/uni_class/create', [UniClassController::class, 'create']);
+// Route::post('/uni_class/assign_to_schedules', [UniClassController::class, 'assign_to_schedules']);
 
 Route::get('/faculty/all', [FacultyController::class, 'all']);
 Route::get('/faculty/all_with_specialties', [FacultyController::class, 'all_with_specialties']);

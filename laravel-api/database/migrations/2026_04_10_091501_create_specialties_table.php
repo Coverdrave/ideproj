@@ -18,15 +18,15 @@ return new class extends Migration
             $table->foreignId('faculty_id')
                 ->constrained('faculties')
                 ->cascadeOnDelete();
-            $table->enum('degree_level', ['bachelor', 'master', 'phd']);
+            // $table->enum('degree_level', ['bachelor', 'master', 'phd']);
             $table->unsignedTinyInteger('duration_semester');
-            $table->boolean('is_part_time');
+            // $table->boolean('is_part_time');
 
             $table->unique([
                 'name',
                 'short_name',
-                'degree_level',
-                'is_part_time'
+                // 'degree_level',
+                // 'is_part_time'
             ]);
 
             // index?

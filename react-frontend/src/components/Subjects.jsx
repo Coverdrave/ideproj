@@ -375,7 +375,7 @@ async function handleSaveLecturers(e) {
               ) : (
                 <tr>
                   <td colSpan="3" className="px-6 py-10 text-center text-slate-400 text-sm">
-                    Няма намерени предмети по зададените критерии.
+                    Няма намерени дисциплини по зададените критерии.
                   </td>
                 </tr>
               )}
@@ -411,7 +411,7 @@ async function handleSaveLecturers(e) {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Име на предмета</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1">Име на дисциплината</label>
               <input
                 type="text" required value={nameInput} onChange={(e) => setNameInput(e.target.value)}
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
@@ -565,7 +565,7 @@ async function handleSaveLecturers(e) {
             </div>
           </form>
         ) : (
-          <p className="text-slate-500 text-sm">Няма избран предмет.</p>
+          <p className="text-slate-500 text-sm">Няма избрана дисциплина.</p>
         )}
       </div>
     </div>
@@ -592,9 +592,9 @@ async function handleSaveLecturers(e) {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-bold text-slate-900">Изтриване на предмет</h3>
+              <h3 className="text-lg font-bold text-slate-900">Изтриване на дисциплина</h3>
               <p className="text-sm text-slate-500">
-                Сигурни ли сте, че искате да изтриете предмета <span className="font-semibold text-slate-800">"{selectedSubject.name}"</span>?
+                Сигурни ли сте, че искате да изтриете дисциплината <span className="font-semibold text-slate-800">"{selectedSubject.name}"</span>?
               </p>
               <p className="text-xs text-rose-600 font-medium bg-rose-50 rounded p-2 border border-rose-100">
                 ⚠️ Внимание: Това действие ще премахне свързаните часове!
@@ -619,7 +619,7 @@ async function handleSaveLecturers(e) {
             </div>
           </div>
         ) : (
-          <p className="text-slate-500 text-sm">Няма избран предмет.</p>
+          <p className="text-slate-500 text-sm">Няма избрана дисциплина.</p>
         )}
       </div>
     </div>
@@ -843,11 +843,11 @@ async function handleSaveLecturers(e) {
                (view === "delete") ? deleteBody : 
                (view === "lecturers") ? lecturersBody : (<></>);
 
-  const headerText = (view === "main") ? "Предмети" :
-                     (view === "create") ? "Добавяне на предмет" :
-                     (view === "edit") ? "Редактиране на предмет" :
-                     (view === "delete") ? "Изтриване на предмет" :
-                     (view === "lecturers") ? "Преподаватели по предмет" : "";
+  const headerText = (view === "main") ? "Дисциплини" :
+                     (view === "create") ? "Добавяне на дисциплина" :
+                     (view === "edit") ? "Редактиране на дисциплина" :
+                     (view === "delete") ? "Изтриване на дисциплина" :
+                     (view === "lecturers") ? "Преподаватели по дисциплина" : "";
 
   return <PopupModal close={closeModal} headerText={headerText} body={body} />;
 }

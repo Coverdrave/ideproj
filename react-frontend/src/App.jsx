@@ -1,13 +1,13 @@
 import { useEffect, useState, lazy, Suspense } from "react";
 import "./App.css";
 import ScheduleGrid from "./components/ScheduleGrid.jsx";
-import StudentGroups from "./components/StudentGroups.jsx";
-import Schedules from "./components/Schedules.jsx";
 
 const Faculties = lazy(() => import('./components/Faculties.jsx'));
 const Specialties = lazy(() => import('./components/Specialties.jsx'));
 const Subjects = lazy(() => import('./components/Subjects.jsx'));
 const Lecturers = lazy(() => import('./components/Lecturers.jsx'));
+const StudentGroups = lazy(() => import('./components/StudentGroups.jsx'));
+const Schedules = lazy(() => import('./components/Schedules.jsx'));
 const GenerateSchedule = lazy(() => import('./components/GenerateSchedule.jsx'));
 const ChangeScheduleModal = lazy(() => import('./components/ChangeScheduleModal.jsx'));
 
@@ -62,7 +62,7 @@ export default function App() {
               Специалности
             </button>
             <button type="button" onClick={() => open("subjects")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-              Предмети
+              Дисциплини
             </button>
             <button type="button" onClick={() => open("lecturers")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
               Преподаватели
@@ -71,7 +71,7 @@ export default function App() {
               Групи
             </button>
             <button type="button" onClick={() => open("schedules")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-              Разписания
+              Графици
             </button>
             <button type="button" onClick={() => open("generateSchedule")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
               Генериране
@@ -89,8 +89,8 @@ export default function App() {
             </Suspense>
           </div>
           <div>
-            <button type="button" onClick={() => open("changeScheduleModal")} className="button rounded-md shadow-md bg-blue-500 text-white p-2">
-              Програма
+            <button type="button" onClick={() => open("changeScheduleModal")} className="button nowrap rounded-md shadow-md bg-blue-500 text-white p-2">
+              Смени График
             </button>
           </div>
         </div>

@@ -37,9 +37,9 @@ class DatabaseSeeder extends Seeder
                 'name' => 'Компютърни системи и технологии', 
                 'short_name' => 'КСТ', 
                 'faculty_id' => $faculties['ЕЕА']->id,
-                'degree_level' => 'bachelor',
+                // 'degree_level' => 'bachelor',
                 'duration_semester' => 8,
-                'is_part_time' => false
+                // 'is_part_time' => false
             ]
         ])->mapWithKeys(function ($data) {
             return [
@@ -216,7 +216,7 @@ class DatabaseSeeder extends Seeder
         $schedule27B = makeSchedule($groups['27'], 'Б', 7);
         $schedule27ASummer = makeSchedule($groups['27'], 'А', 8);
 
-        /*
+        // /*
         $schedule27ASummer->uniClasses()->syncWithoutDetaching([
             classSlot(
                 $subjects['Локални мрежи'],
@@ -626,7 +626,7 @@ class DatabaseSeeder extends Seeder
                 true
             )->id,
         ]);
-        */
+        // */
     }
         
 }

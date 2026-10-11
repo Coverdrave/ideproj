@@ -12,20 +12,20 @@ class Specialty extends Model
         'name',
         'short_name',
         'faculty_id',
-        'degree_level',
+        // 'degree_level',
         'duration_semester',
-        'is_part_time'
+        // 'is_part_time'
     ];
 
     protected $casts = [
         'duration_semester' => 'integer',
-        'is_part_time' => 'boolean'
+        // 'is_part_time' => 'boolean'
     ];
 
     public static $rules = [
         'faculty_id' => 'required|exists:faculties,id',
         'duration_semester' => 'required|integer|min:1',
-        'degree_level' => 'required|in:bachelor,master,phd'
+        // 'degree_level' => 'required|in:bachelor,master,phd'
     ];
 
     public function faculty(): BelongsTo

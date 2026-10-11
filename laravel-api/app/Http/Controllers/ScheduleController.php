@@ -19,30 +19,32 @@ class ScheduleController extends Controller
         'even' => 2
     ];
 
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $validated = $request->validate([
             'group_number' => 'required|exists:student_groups,group_number',
             'semester' => 'required|integer|min:1'
         ]);
 
         $studentGroup = StudentGroup::where(
-            'group_number', $validated['group_number']
+            'group_number',
+            $validated['group_number']
         )->firstOrFail();
 
         $schedules = Schedule::where('student_group_id', $studentGroup->id)
             ->where('semester', $validated['semester'])
             ->with(['uniClasses' => function ($q) {
                 $q->orderBy('day')
-                ->orderByRaw("
+                    ->orderByRaw("
                     CASE week
                         WHEN 'odd'   THEN 1
                         WHEN 'every' THEN 2
                         WHEN 'even'  THEN 3
                     END
                 ")
-                  ->orderBy('start_hour');
+                    ->orderBy('start_hour');
             }])
-        ->get();
+            ->get();
 
         $rows = [];
 
@@ -80,7 +82,8 @@ class ScheduleController extends Controller
         ];
     }
 
-    public function change_schedule_modal() {
+    public function change_schedule_modal()
+    {
         $schedules = Schedule::with('studentGroup.specialty')->get();
 
         return $schedules->map(function ($schedule) {
@@ -92,7 +95,8 @@ class ScheduleController extends Controller
         })->unique()->values();
     }
 
-    public function all() {
+    public function all()
+    {
         $schedules = Schedule::with('studentGroup.specialty')->get();
 
         $sorted = $schedules->sortBy([
@@ -104,10 +108,11 @@ class ScheduleController extends Controller
         return response()->json($sorted->values());
     }
 
-    public function create(Request $request) {
+    public function create(Request $request)
+    {
         $validated = $request->validate([
             'student_group_id' => 'required|exists:student_groups,id',
-            'subgroup'         => 'required|string|size:1',
+            'subgroup'         => 'required|string|size:1|regex:/^[А-Я]$/u',
             'semester'         => 'required|integer|min:1',
         ]);
 
@@ -128,7 +133,8 @@ class ScheduleController extends Controller
         return response()->json($schedule->load('studentGroup.specialty'), 201);
     }
 
-    public function update(Request $request, int $id) {
+    public function update(Request $request, int $id)
+    {
         $schedule = Schedule::findOrFail($id);
 
         $validated = $request->validate([
@@ -154,12 +160,14 @@ class ScheduleController extends Controller
         return response()->json($schedule->load('studentGroup.specialty'));
     }
 
-    public function destroy(int $id) {
+    public function delete(int $id)
+    {
         Schedule::findOrFail($id)->delete();
         return response()->json(['success' => true]);
     }
 
-    public function get_existing_subgroups(Request $request) {
+    public function get_existing_subgroups(Request $request)
+    {
         $validated = $request->validate([
             'specialty_id' => 'required|exists:specialties,id',
             'semester' => 'required|integer|min:1',
@@ -169,22 +177,22 @@ class ScheduleController extends Controller
         ]);
 
         // 1. Get selected schedules and eager load ALL their classes
-        $selectedSchedules = Schedule::whereHas('studentGroup', function($query) use ($validated) {
-                $query->where('specialty_id', $validated['specialty_id'])
-                    ->where('group_number', $validated['group_number']);
-            })
+        $selectedSchedules = Schedule::whereHas('studentGroup', function ($query) use ($validated) {
+            $query->where('specialty_id', $validated['specialty_id'])
+                ->where('group_number', $validated['group_number']);
+        })
             ->where('semester', $validated['semester'])
             ->whereIn('subgroup', $validated['selected_subgroups'])
-            ->with('uniClasses') 
+            ->with('uniClasses')
             ->get();
 
         // 2. Get OTHER schedules for the SAME specialty, and eager load ALL their classes
-        $otherSchedules = Schedule::whereHas('studentGroup', function($query) use ($validated) {
-                $query->where('specialty_id', $validated['specialty_id']);
-            })
+        $otherSchedules = Schedule::whereHas('studentGroup', function ($query) use ($validated) {
+            $query->where('specialty_id', $validated['specialty_id']);
+        })
             ->where('semester', $validated['semester'])
             ->whereNotIn('id', $selectedSchedules->pluck('id'))
-            ->with('uniClasses') 
+            ->with('uniClasses')
             ->get();
 
         // 3. Check if they have classes in memory
@@ -198,10 +206,10 @@ class ScheduleController extends Controller
 
         // 4. Extract ONLY lectures from the already-loaded other schedules
         $existingLectures = $otherSchedules->flatMap(function ($schedule) {
-                return $schedule->uniClasses;
-            })
+            return $schedule->uniClasses;
+        })
             ->filter(function ($class) {
-                return !$class->is_exercise; 
+                return !$class->is_exercise;
             })
             ->unique('id')
             ->keyBy('subject_id');
@@ -222,7 +230,8 @@ class ScheduleController extends Controller
         ];
     }
 
-    public function save_generated(Request $request) {
+    public function save_generated(Request $request)
+    {
         $validated = $request->validate([
             'specialty_id' => 'required|exists:specialties,id',
             'group_number' => 'required|exists:student_groups,group_number',
@@ -234,23 +243,23 @@ class ScheduleController extends Controller
             'override_selected' => 'required|boolean'
         ]);
 
-        $schedules = Schedule::whereHas('studentGroup', function($query) use ($validated) {
-                $query->where('group_number', $validated['group_number']);
-            })
+        $schedules = Schedule::whereHas('studentGroup', function ($query) use ($validated) {
+            $query->where('group_number', $validated['group_number']);
+        })
             ->where('semester', $validated['semester'])
             ->whereIn('subgroup', $validated['subgroups'])
             ->get()
-        ->keyBy('subgroup');
+            ->keyBy('subgroup');
 
         if ($validated['delete_existing']) {
-            Schedule::whereHas('studentGroup', function($query) use ($validated) {
+            Schedule::whereHas('studentGroup', function ($query) use ($validated) {
                 $query->where('specialty_id', $validated['specialty_id']);
             })
-            ->where('semester', $validated['semester'])
-            ->whereNotIn('id', $schedules->pluck('id'))
-            ->each(function ($schedule) {
-                $schedule->uniClasses()->detach();
-            });
+                ->where('semester', $validated['semester'])
+                ->whereNotIn('id', $schedules->pluck('id'))
+                ->each(function ($schedule) {
+                    $schedule->uniClasses()->detach();
+                });
         }
 
         if ($validated['override_selected']) {
@@ -258,7 +267,7 @@ class ScheduleController extends Controller
                 $schedule->uniClasses()->detach();
             }
         }
-        
+
         foreach ($validated["generated"] as $key => $details) {
             [$subgroup, $subject_id, $lect_or_exer] = explode("_", $key);
 
@@ -284,7 +293,8 @@ class ScheduleController extends Controller
         ], 201);
     }
 
-    public function generate(Request $request) {
+    public function generate(Request $request)
+    {
         $variables = [];
         $domains = [];
 
@@ -296,8 +306,13 @@ class ScheduleController extends Controller
         ];
 
         $subjectIds = array_keys($request->subjects_options);
-        $subjectsWithLecturers = Subject::with('lecturers')->whereIn('id', $subjectIds)->get()->keyBy('id');
-        
+        $subjectsWithLecturers = Subject::with('lecturers')
+            ->whereIn('id', $subjectIds)
+            ->get()
+            ->keyBy('id');
+
+        //Форматиране на масив с вече съществуващи упражнения
+        //от други графици
         $conflictingExercises = [];
         if ($request->conflicting_exercises != "") {
             foreach ($request->conflicting_exercises as $ex) {
@@ -311,12 +326,15 @@ class ScheduleController extends Controller
             }
         }
 
+        //Обхождане на предметите и техните опции
+        //и добавяне на лекциите към масивите,
+        //използвани за генериране
         foreach ($request->subjects_options as $subject_id => $subject_options) {
             if (array_key_exists('use_existing', $subject_options['lecture'])) {
                 $uniclass =  $subject_options['lecture']['use_existing'];
-                
+
                 foreach ($request->subgroups as $subgroup) {
-                    $variables[] = $var_lect = $subgroup.'_'.$subject_id.'_lecture';
+                    $variables[] = $var_lect = $subgroup . '_' . $subject_id . '_lecture';
 
                     $domains[$var_lect][] = [
                         'day' => $uniclass['day'],
@@ -326,8 +344,7 @@ class ScheduleController extends Controller
                         'lecturer_id' => $uniclass['lecturer_id']
                     ];
                 }
-            }
-            else {
+            } else {
                 $lect_week = $subject_options["lecture"]["every_week"];
                 $duration = $subject_options["lecture"]["duration"];
 
@@ -336,8 +353,10 @@ class ScheduleController extends Controller
                     ->pluck('id');
 
                 foreach ($request->subgroups as $subgroup) {
-                    $variables[] = $var_lect = $subgroup.'_'.$subject_id.'_lecture';
+                    $variables[] = $var_lect = $subgroup . '_' . $subject_id . '_lecture';
 
+                    //Декартово произведение на всички
+                    //възможни варианти за учебен час
                     foreach ($this->cartesian_product([$days, $hours, $weeks[$lect_week], $lecturers]) as [$day, $hour, $week, $lecturer_id]) {
                         $domains[$var_lect][] = [
                             'day' => $day,
@@ -350,7 +369,10 @@ class ScheduleController extends Controller
                 }
             }
         }
-        
+
+        //Обхождане на предметите и техните опции
+        //и добавяне на упражненията към масивите,
+        //използвани за генериране
         foreach ($request->subjects_options as $subject_id => $subject_options) {
             $exer_week = $subject_options["exercise"]["every_week"];
             $duration = $subject_options["exercise"]["duration"];
@@ -360,10 +382,13 @@ class ScheduleController extends Controller
                 ->pluck('id');
 
             foreach ($request->subgroups as $subgroup) {
-                $variables[] = $var_exer = $subgroup.'_'.$subject_id.'_exercise';
+                $variables[] = $var_exer = $subgroup . '_' . $subject_id . '_exercise';
 
                 foreach ($this->cartesian_product([$days, $hours, $weeks[$exer_week], $lecturers]) as [$day, $hour, $week, $lecturer_id]) {
-                    
+
+                    //Добавяне на възможни упражнения,
+                    //които няма да имат конфликти
+                    //с вече съществуващите
                     if ($request->conflicting_exercises != "") {
                         if (isset($conflictingExercises[$subject_id])) {
                             $isConflict = false;
@@ -379,11 +404,11 @@ class ScheduleController extends Controller
                                 }
                             }
                             if ($isConflict) {
-                                continue; // Skip adding this slot to CSP variable domain
+                                continue;
                             }
                         }
                     }
-                    
+
                     $domains[$var_exer][] = [
                         'day' => $day,
                         'hour' => $hour,
@@ -395,30 +420,31 @@ class ScheduleController extends Controller
             }
         }
 
+        //Инстанциране на класът, съдържащ алгоритъма за генериране
         $csp = new ConstraintSatisfaction($variables, $domains);
         $generated = $csp->solve();
 
         return [
-            // 'options' => $request->subjects_options,
             'info' => [
                 'groupNumber' => $request->group_number,
                 'subgroups' => $request->subgroups,
                 'semester' => $request->semester
             ],
-            // 'vars' => $variables,
             'generated' => $generated,
             'orderedClasses' => $this->format_generate_for_schedule_grid($generated, $request->subgroups, $days),
         ];
     }
 
-    private function durationOverlap(int $start1, int $duration1, int $start2, int $duration2) : bool {
+    private function durationOverlap(int $start1, int $duration1, int $start2, int $duration2): bool
+    {
         $end1 = $start1 + $duration1;
         $end2 = $start2 + $duration2;
 
         return ($start2 < $end1 && $end2 > $start1);
     }
 
-    private function cartesian_product(array $arrays): array {
+    private function cartesian_product(array $arrays): array
+    {
         $result = [[]];
         foreach ($arrays as $array) {
             $new = [];
@@ -432,7 +458,8 @@ class ScheduleController extends Controller
         return $result;
     }
 
-    private function format_generate_for_schedule_grid(array $generated, array $subgroups, array $days) : array {
+    private function format_generate_for_schedule_grid(array $generated, array $subgroups, array $days): array
+    {
         uasort($generated, function ($a, $b) {
             if ($this->weekCmp[$a['week']] !== $this->weekCmp[$b['week']]) {
                 return $this->weekCmp[$a['week']] <=> $this->weekCmp[$b['week']];
@@ -454,7 +481,7 @@ class ScheduleController extends Controller
             $subject = Subject::where("id", $subject_id)->first();
             if (!$subject) continue; //?
 
-            
+
 
             $formatted[$val["day"]][$subgroup][] = [
                 'id'          => $subject->id,
